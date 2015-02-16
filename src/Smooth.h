@@ -30,6 +30,7 @@ class Smooth {
     density NewState(int x, int y) const;
     void SeedRandom();
     void SeedDisk();
+    void SeedRing();
     void Update();
     void Write(std::ostream &out);
     int Frame() const;

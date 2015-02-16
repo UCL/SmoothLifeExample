@@ -56,7 +56,33 @@ TEST_CASE( "Smooth mathematical functions are correct","[Smooth]") {
     REQUIRE(smooth.TorusDifference(5,10) == 5);
     REQUIRE(smooth.Radius(10,10,13,14)==5.0);
   }
+}
+
+TEST_CASE ("NormalisationsAreCorrect") {
+  Smooth smooth(100,10);
   SECTION ("Disk Normalisation is correct") {
-    REQUIRE(std::abs(smooth.NormalisationDisk()-1385.7827)<0.1);
+    // Should be roughly pi*radius*radius, 
+    REQUIRE(std::abs(smooth.NormalisationDisk()-314.15)<1.0);
+  }
+  SECTION ("Ring Normalisation is correct") {
+    // Should be roughly pi*outer*outer-pi*inner*inner, pi*100*(9-1), 2513.27
+    REQUIRE(std::abs(smooth.NormalisationRing()-2513.27)<2.0);
+  }
+}
+
+TEST_CASE ("FillingsAreUnityWhenSeeded") {
+  Smooth smooth;
+  SECTION ("DiskFillingUnityWithDiskSeed") {
+    smooth.SeedDisk();
+    REQUIRE(abs(smooth.FillingDisk(0,0)-1.0)<0.1);
+  }
+
+  SECTION ("Disk Filling Zero With Ring Seed") {
+    smooth.SeedRing();
+    REQUIRE(abs(smooth.FillingDisk(0,0))<0.1);
+  }
+  SECTION ("RingFillingUnityWithRingSeed") {
+    smooth.SeedRing();
+    REQUIRE(abs(smooth.FillingRing(0,0)-1.0)<0.1);
   }
 }

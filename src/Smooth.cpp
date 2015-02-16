@@ -52,7 +52,7 @@ double Smooth::Ring(distance radius) const {
     return 0.0;
   }
   if (radius<inner+smoothing/2) {
-    return (inner+smoothing/2-radius)/smoothing;
+    return (radius+smoothing/2-inner)/smoothing;
   }
   if (radius<outer-smoothing/2) {
     return 1.0;
@@ -165,6 +165,14 @@ void Smooth::SeedDisk() {
    for (int x=0;x<size;x++) {
      for (int y=0;y<size;y++) {
       (*field)[x][y]=Disk(Radius(0,0,x,y));
+     }
+   }
+}
+
+void Smooth::SeedRing() {
+   for (int x=0;x<size;x++) {
+     for (int y=0;y<size;y++) {
+      (*field)[x][y]=Ring(Radius(0,0,x,y));
      }
    }
 }
