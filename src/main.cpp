@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv){
   Smooth smooth;
-  smooth.SeedRing();
+  smooth.SeedDisk();
   std::ofstream outfile("test.dat");
   while (smooth.Frame()<100) {
     smooth.Write(outfile);

@@ -11,16 +11,16 @@ Smooth::Smooth(int size,
         filling birth_2 ,
         filling death_1,
         filling death_2,
-        filling smoothing_inner,
-        filling smoothing_outer)
+        filling smoothing_disk,
+        filling smoothing_ring)
     : size(100),
     inner(inner),
     birth_1(birth_1),
     birth_2(birth_2),
     death_1(death_1),
     death_2(death_2),
-    smoothing_inner(smoothing_inner),
-    smoothing_outer(smoothing_outer),
+    smoothing_disk(smoothing_disk),
+    smoothing_ring(smoothing_ring),
     outer(inner*3),
     smoothing(1.0),
     field1(size,std::vector<density>(size)),
@@ -63,14 +63,14 @@ double Smooth::Ring(distance radius) const {
   return 0.0;
  }
 
-double Smooth::Sigmoid(double center, double variable, double width){
+double Smooth::Sigmoid(double variable, double center, double width){
   return 1.0/(1.0+std::exp(4.0*(center-variable)/width));
 }
 
-density Smooth::transition(filling inner, filling outer) const {
-  double t1=birth_1*(1.0-Sigmoid(inner,0.5,smoothing_inner))+death_1*Sigmoid(inner,0.5,smoothing_inner);
-  double t2=birth_2*(1.0-Sigmoid(inner,0.5,smoothing_inner))+death_2*Sigmoid(inner,0.5,smoothing_inner);
-  return Sigmoid(outer,t1,smoothing_outer)*(1.0-Sigmoid(outer,t2,smoothing_outer));
+density Smooth::transition(filling disk, filling ring) const {
+  double t1=birth_1*(1.0-Sigmoid(disk,0.5,smoothing_disk))+death_1*Sigmoid(disk,0.5,smoothing_disk);
+  double t2=birth_2*(1.0-Sigmoid(disk,0.5,smoothing_disk))+death_2*Sigmoid(disk,0.5,smoothing_disk);
+  return Sigmoid(ring,t1,smoothing_ring)*(1.0-Sigmoid(ring,t2,smoothing_ring));
 }
 
 const std::vector<std::vector<density> > & Smooth::Field() const {

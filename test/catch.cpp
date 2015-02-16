@@ -48,7 +48,16 @@ TEST_CASE( "Smooth mathematical functions are correct","[Smooth]") {
   SECTION ("Sigmoid function is correct") {
     double e=std::exp(1.0);
     REQUIRE(Smooth::Sigmoid(1.0,1.0,4.0) == 0.5);
-    REQUIRE(std::abs(Smooth::Sigmoid(0.0,1.0,4.0)-e/(1+e))<0.0001);
+    REQUIRE(std::abs(Smooth::Sigmoid(1.0,0.0,4.0)-e/(1+e))<0.0001);
+    REQUIRE(Smooth::Sigmoid(10000,1.0,4.0) == 1.0);
+    REQUIRE(std::abs(Smooth::Sigmoid(0.0,1.0,0.1)) < 0.001);
+  }
+  SECTION ("Transition function is correct") {
+    REQUIRE(abs(smooth.transition(1.0,0.3) - 1.0) <0.1);
+    REQUIRE(smooth.transition(1.0,1.0)==0.0);
+    REQUIRE(abs(smooth.transition(0.0,0.3)-1.0) < 0.1);
+    REQUIRE(abs(smooth.transition(0.0,0.0)) < 0.1);
+
   }
   SECTION ("Wraparound Distance is correct") {
     REQUIRE(smooth.TorusDifference(95,5) == 10);

@@ -13,14 +13,14 @@ class Smooth {
     filling birth_2=0.365,
     filling death_1=0.267,
     filling death_2=0.445,
-    filling smoothing_inner=0.028,
-    filling smoothing_outer=0.147);
+    filling smoothing_disk=0.147,
+    filling smoothing_ring=0.028);
     int Size();
     const std::vector<std::vector<density> > & Field() const;
     double Disk(distance radius) const;
     double Ring(distance radius) const;
-    static double Sigmoid(double centre, double variable, double width);
-    density transition(filling inner, filling outer) const;
+    static double Sigmoid(double variable, double center, double width);
+    density transition(filling disk, filling ring) const;
     int TorusDifference(int x1,int x2) const ;
     double Radius(int x1, int y1, int x2, int y2) const;
     double NormalisationRing() const;
@@ -45,8 +45,8 @@ class Smooth {
     filling birth_2;
     filling death_1;
     filling death_2;
-    filling smoothing_inner;
-    filling smoothing_outer;
+    filling smoothing_disk;
+    filling smoothing_ring;
     distance outer;
     distance smoothing;
     int frame;
