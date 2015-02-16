@@ -1,4 +1,6 @@
 #include <cmath>
+#include <cstdlib>
+#include <iostream>
 
 #include "smooth.h"
 
@@ -21,15 +23,21 @@ Smooth::Smooth(int size,
     smoothing_outer(smoothing_outer),
     outer(inner*3),
     smoothing(1.0),
-    field(size,std::vector<density>(size))
+    field1(size,std::vector<density>(size)),
+    field2(size,std::vector<density>(size)),
+    field(&field1),
+    fieldNew(&field2),
+    frame(0)
 {
+  normalisation_disk=NormalisationDisk();
+  normalisation_ring=NormalisationRing();
 }
 
 int Smooth::Size(){
   return size;
 }
 
-double Smooth::Disk(distance radius){
+double Smooth::Disk(distance radius) const {
   if (radius>inner+smoothing/2) {
     return 0.0;
   }
@@ -39,7 +47,7 @@ double Smooth::Disk(distance radius){
   return (inner+smoothing/2-radius)/smoothing;
 }
 
-double Smooth::Ring(distance radius){
+double Smooth::Ring(distance radius) const {
   if (radius<inner-smoothing/2) {
     return 0.0;
   }
@@ -59,13 +67,118 @@ double Smooth::Sigmoid(double center, double variable, double width){
   return 1.0/(1.0+std::exp(4.0*(center-variable)/width));
 }
 
-density Smooth::transition(filling inner, filling outer){
+density Smooth::transition(filling inner, filling outer) const {
   double t1=birth_1*(1.0-Sigmoid(inner,0.5,smoothing_inner))+death_1*Sigmoid(inner,0.5,smoothing_inner);
   double t2=birth_2*(1.0-Sigmoid(inner,0.5,smoothing_inner))+death_2*Sigmoid(inner,0.5,smoothing_inner);
   return Sigmoid(outer,t1,smoothing_outer)*(1.0-Sigmoid(outer,t2,smoothing_outer));
 }
 
 const std::vector<std::vector<density> > & Smooth::Field() const {
-  return field;
+  return *field;
 };
 
+int Smooth::TorusDifference(int x1, int x2) const {
+    int straight=std::abs(x2-x1);
+    int wrapleft=std::abs(x2-x1+size);
+    int wrapright=std::abs(x2-x1-size);
+    if ((straight<wrapleft) && (straight<wrapright)) {
+      return straight;
+    } else {
+      return (wrapleft < wrapright) ? wrapleft : wrapright;
+    }
+}
+
+double Smooth::Radius(int x1,int y1,int x2,int y2) const {
+  return std::sqrt(std::pow(TorusDifference(x1,x2),2)+std::pow(TorusDifference(y1,y2),2));
+}
+
+double Smooth::NormalisationDisk() const {
+  double total=0.0;
+  for (int x=0;x<size;x++) {
+     for (int y=0;y<size;y++) {
+       total+=Disk(Radius(0,0,x,y));
+    }
+  };
+  return total;
+}
+
+double Smooth::NormalisationRing() const {
+  double total=0.0;
+  for (int x=0;x<size;x++) {
+     for (int y=0;y<size;y++) {
+       total+=Ring(Radius(0,0,x,y));
+    }
+  };
+  return total;
+}
+
+filling Smooth::FillingDisk(int x, int y) const {
+  double total=0.0;
+  for (int x1=0;x1<size;x1++) {
+     for (int y1=0;y1<size;y1++) {
+       if (TorusDifference(x,x1) > inner+smoothing) continue;
+       if (TorusDifference(y,y1) > inner+smoothing) continue;
+       total+=(*field)[x1][y1]*Disk(Radius(x,y,x1,y1));
+    }
+  };
+  return total/normalisation_disk;
+}
+
+filling Smooth::FillingRing(int x, int y) const {
+  double total=0.0;
+  for (int x1=0;x1<size;x1++) {
+     for (int y1=0;y1<size;y1++) {
+       if (TorusDifference(x,x1) > outer+smoothing) continue;
+       if (TorusDifference(y,y1) > outer+smoothing) continue;
+       total+=(*field)[x1][y1]*Ring(Radius(x,y,x1,y1));
+    }
+  };
+  return total/normalisation_ring;
+}
+
+density Smooth::NewState(int x, int y) const {
+  return transition(FillingDisk(x,y),FillingRing(x,y));
+}
+
+void Smooth::Update() {
+  for (int x=0;x<size;x++) {
+    for (int y=0;y<size;y++) {
+      (*fieldNew)[x][y]=NewState(x,y);
+   }
+  }
+  std::vector<std::vector<density> > * fieldTemp;
+  fieldTemp=field;
+  field=fieldNew;
+  fieldNew=fieldTemp;
+  frame++;
+}
+
+void Smooth::SeedRandom() {
+   for (int x=0;x<size;x++) {
+     for (int y=0;y<size;y++) {
+      (*field)[x][y]=(static_cast<double>(rand()) / static_cast<double>(RAND_MAX));
+     }
+   }
+}
+
+void Smooth::SeedDisk() {
+   for (int x=0;x<size;x++) {
+     for (int y=0;y<size;y++) {
+      (*field)[x][y]=Disk(Radius(0,0,x,y));
+     }
+   }
+}
+
+void Smooth::Write(std::ostream &out) {
+   for (int x=0;x<size;x++) {
+     for (int y=0;y<size;y++) {
+        out << (*field)[x][y] << " , ";
+     }
+     out << std::endl;
+   }
+   out << std::endl;
+}
+
+int Smooth::Frame() const {
+  return frame;
+}

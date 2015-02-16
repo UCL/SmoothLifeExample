@@ -50,4 +50,13 @@ TEST_CASE( "Smooth mathematical functions are correct","[Smooth]") {
     REQUIRE(Smooth::Sigmoid(1.0,1.0,4.0) == 0.5);
     REQUIRE(std::abs(Smooth::Sigmoid(0.0,1.0,4.0)-e/(1+e))<0.0001);
   }
+  SECTION ("Wraparound Distance is correct") {
+    REQUIRE(smooth.TorusDifference(95,5) == 10);
+    REQUIRE(smooth.TorusDifference(5,96) == 9);
+    REQUIRE(smooth.TorusDifference(5,10) == 5);
+    REQUIRE(smooth.Radius(10,10,13,14)==5.0);
+  }
+  SECTION ("Disk Normalisation is correct") {
+    REQUIRE(std::abs(smooth.NormalisationDisk()-1385.7827)<0.1);
+  }
 }

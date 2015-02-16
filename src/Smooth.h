@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 
 typedef double density;
 typedef double distance;
@@ -16,13 +17,28 @@ class Smooth {
     filling smoothing_outer=0.147);
     int Size();
     const std::vector<std::vector<density> > & Field() const;
-    double Disk(distance radius);
-    double Ring(distance radius);
+    double Disk(distance radius) const;
+    double Ring(distance radius) const;
     static double Sigmoid(double centre, double variable, double width);
-    density transition(filling inner, filling outer);
+    density transition(filling inner, filling outer) const;
+    int TorusDifference(int x1,int x2) const ;
+    double Radius(int x1, int y1, int x2, int y2) const;
+    double NormalisationRing() const;
+    double NormalisationDisk() const;
+    filling FillingRing(int x,int y) const;
+    filling FillingDisk(int x,int y) const;
+    density NewState(int x, int y) const;
+    void SeedRandom();
+    void SeedDisk();
+    void Update();
+    void Write(std::ostream &out);
+    int Frame() const;
   private:
     int size;
-    std::vector<std::vector<density> > field;
+    std::vector<std::vector<density> > field1;
+    std::vector<std::vector<density> > field2;
+    std::vector<std::vector<density> > * field;
+    std::vector<std::vector<density> > * fieldNew;
     distance inner;
     filling birth_1;
     filling birth_2;
@@ -32,5 +48,8 @@ class Smooth {
     filling smoothing_outer;
     distance outer;
     distance smoothing;
+    int frame;
+    double normalisation_disk;
+    double normalisation_ring;
 };
 
