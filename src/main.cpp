@@ -3,12 +3,12 @@
 #include "Smooth.h"
 
 int main(int argc, char **argv){
-  Smooth smooth;
-  smooth.SeedDisk();
+  Smooth smooth(300);
+  smooth.SeedRing();
   std::ofstream outfile("test.dat");
-  while (smooth.Frame()<100) {
+  while (smooth.Frame()<10) {
     smooth.Write(outfile);
-    smooth.Update();
+    smooth.QuickUpdate();
     std::cout << smooth.Frame() << " " << std::flush;
   }
 }

@@ -32,6 +32,7 @@ class Smooth {
     void SeedDisk();
     void SeedRing();
     void Update();
+    void QuickUpdate();
     void Write(std::ostream &out);
     int Frame() const;
   private:

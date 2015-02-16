@@ -95,3 +95,17 @@ TEST_CASE ("FillingsAreUnityWhenSeeded") {
     REQUIRE(abs(smooth.FillingRing(0,0)-1.0)<0.1);
   }
 }
+
+TEST_CASE ("FillingFieldHasRangeofValues") {
+  Smooth smooth(300);
+  smooth.SeedRing();
+  double min=1.0;
+  double max=0.0;
+  for (int x=0;x<300;x++) {
+    double filling=smooth.FillingRing(x,0);
+    if (filling<min) min=filling;
+    if (filling>max) max=filling;
+  }
+  REQUIRE(min<0.2);
+  REQUIRE(max>0.4);
+}

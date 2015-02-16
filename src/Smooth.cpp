@@ -13,7 +13,7 @@ Smooth::Smooth(int size,
         filling death_2,
         filling smoothing_disk,
         filling smoothing_ring)
-    : size(100),
+    : size(size),
     inner(inner),
     birth_1(birth_1),
     birth_2(birth_2),
@@ -116,8 +116,6 @@ filling Smooth::FillingDisk(int x, int y) const {
   double total=0.0;
   for (int x1=0;x1<size;x1++) {
      for (int y1=0;y1<size;y1++) {
-       if (TorusDifference(x,x1) > inner+smoothing) continue;
-       if (TorusDifference(y,y1) > inner+smoothing) continue;
        total+=(*field)[x1][y1]*Disk(Radius(x,y,x1,y1));
     }
   };
@@ -128,8 +126,6 @@ filling Smooth::FillingRing(int x, int y) const {
   double total=0.0;
   for (int x1=0;x1<size;x1++) {
      for (int y1=0;y1<size;y1++) {
-       if (TorusDifference(x,x1) > outer+smoothing) continue;
-       if (TorusDifference(y,y1) > outer+smoothing) continue;
        total+=(*field)[x1][y1]*Ring(Radius(x,y,x1,y1));
     }
   };
@@ -141,11 +137,45 @@ density Smooth::NewState(int x, int y) const {
 }
 
 void Smooth::Update() {
+   for (int x=0;x<size;x++) {
+     for (int y=0;y<size;y++) {
+      (*fieldNew)[x][y]=NewState(x,y);
+     }
+   }
+
+  std::vector<std::vector<density> > * fieldTemp;
+  fieldTemp=field;
+  field=fieldNew;
+  fieldNew=fieldTemp;
+  frame++;
+
+}
+
+void Smooth::QuickUpdate() {
   for (int x=0;x<size;x++) {
     for (int y=0;y<size;y++) {
-      (*fieldNew)[x][y]=NewState(x,y);
-   }
+      double ring_total=0.0;
+      double disk_total=0.0;
+
+      for (int x1=0;x1<size;x1++) {
+          int deltax=TorusDifference(x,x1);
+          if (deltax>outer+smoothing/2) continue;
+
+          for (int y1=0;y1<size;y1++) {
+            int deltay=TorusDifference(y,y1);
+            if (deltay>outer+smoothing/2) continue;
+
+            double radius=std::sqrt(deltax*deltax+deltay*deltay);
+            double fieldv=(*field)[x1][y1];
+            ring_total+=fieldv*Ring(radius);
+            disk_total+=fieldv*Disk(radius);
+          }
+      }
+
+      (*fieldNew)[x][y]=transition(disk_total/normalisation_disk,ring_total/normalisation_ring);
+    }
   }
+
   std::vector<std::vector<density> > * fieldTemp;
   fieldTemp=field;
   field=fieldNew;
