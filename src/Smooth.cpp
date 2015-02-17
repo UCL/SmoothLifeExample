@@ -1,6 +1,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
+#include <cstring>
 
 #include "smooth.h"
 
@@ -8,13 +10,15 @@
 Smooth::Smooth(int sizex,
         int sizey,
         distance inner,
+        int rank,
+        int mpi_size,
         filling birth_1,
         filling birth_2 ,
         filling death_1,
         filling death_2,
         filling smoothing_disk,
         filling smoothing_ring)
-    : sizex(sizex),
+    :
     sizey(sizey),
     inner(inner),
     birth_1(birth_1),
@@ -25,28 +29,51 @@ Smooth::Smooth(int sizex,
     smoothing_ring(smoothing_ring),
     outer(inner*3),
     smoothing(1.0),
-    field1(sizex,std::vector<density>(sizey)),
-    field2(sizex,std::vector<density>(sizey)),
+    frame(0),
+    range(outer+smoothing/2),
+    local_x_size(sizex/mpi_size),
+    local_x_size_with_halo(local_x_size+2*range),
+    total_x_size(sizex),
+    x_coordinate_offset(rank*local_x_size-range),
+    local_x_min_calculate(range),
+    local_x_max_calculate(range+local_x_size),
+    field1(local_x_size_with_halo,std::vector<density>(sizey)),
+    field2(local_x_size_with_halo,std::vector<density>(sizey)),
     field(&field1),
-    fieldNew(&field2),
-    frame(0)
+    fieldNew(&field2)
 {
   normalisation_disk=NormalisationDisk();
   normalisation_ring=NormalisationRing();
+  assert(sizex%mpi_size==0); // WE WILL NOT TRY TO DEAL WITH REMAINDERS
+  send_transport_buffer=new density[range*sizey];
+  receive_transport_buffer=new density[range*sizey];
+}
+
+Smooth::~Smooth(){
+  delete send_transport_buffer;
+  delete receive_transport_buffer;
 }
 
 int Smooth::Range(){
-  return outer+smoothing/2;
+  return range;
+}
+
+int Smooth::LocalXSize(){
+  return local_x_size;
+}
+
+int Smooth::LocalXSizeWithHalo(){
+  return local_x_size_with_halo;
 }
 
 int Smooth::Sizex(){
-  return sizex;
+  return total_x_size;
 }
 int Smooth::Sizey(){
   return sizey;
 }
 int Smooth::Size(){
-  return sizex*sizey;
+  return total_x_size*sizey;
 }
 
 double Smooth::Disk(distance radius) const {
@@ -89,7 +116,7 @@ const std::vector<std::vector<density> > & Smooth::Field() const {
   return *field;
 };
 
-int Smooth::TorusDifference(int x1, int x2, int size) const {
+int Smooth::TorusDifference(int x1, int x2, int size) {
     int straight=std::abs(x2-x1);
     int wrapleft=std::abs(x2-x1+size);
     int wrapright=std::abs(x2-x1-size);
@@ -101,12 +128,12 @@ int Smooth::TorusDifference(int x1, int x2, int size) const {
 }
 
 double Smooth::Radius(int x1,int y1,int x2,int y2) const {
-  return std::sqrt(std::pow(TorusDifference(x1,x2,sizex),2)+std::pow(TorusDifference(y1,y2,sizey),2));
+  return std::sqrt(std::pow(TorusDifference(x1+x_coordinate_offset,x2+x_coordinate_offset,total_x_size),2)+std::pow(TorusDifference(y1,y2,sizey),2));
 }
 
 double Smooth::NormalisationDisk() const {
   double total=0.0;
-  for (int x=0;x<sizex;x++) {
+  for (int x=0;x<total_x_size;x++) {
      for (int y=0;y<sizey;y++) {
        total+=Disk(Radius(0,0,x,y));
     }
@@ -116,7 +143,7 @@ double Smooth::NormalisationDisk() const {
 
 double Smooth::NormalisationRing() const {
   double total=0.0;
-  for (int x=0;x<sizex;x++) {
+  for (int x=0;x<total_x_size;x++) {
      for (int y=0;y<sizey;y++) {
        total+=Ring(Radius(0,0,x,y));
     }
@@ -126,7 +153,7 @@ double Smooth::NormalisationRing() const {
 
 filling Smooth::FillingDisk(int x, int y) const {
   double total=0.0;
-  for (int x1=0;x1<sizex;x1++) {
+  for (int x1=0;x1<local_x_size_with_halo;x1++) {
      for (int y1=0;y1<sizey;y1++) {
        total+=(*field)[x1][y1]*Disk(Radius(x,y,x1,y1));
     }
@@ -136,7 +163,7 @@ filling Smooth::FillingDisk(int x, int y) const {
 
 filling Smooth::FillingRing(int x, int y) const {
   double total=0.0;
-  for (int x1=0;x1<sizex;x1++) {
+  for (int x1=0;x1<local_x_size_with_halo;x1++) {
      for (int y1=0;y1<sizey;y1++) {
        total+=(*field)[x1][y1]*Ring(Radius(x,y,x1,y1));
     }
@@ -149,7 +176,7 @@ density Smooth::NewState(int x, int y) const {
 }
 
 void Smooth::Update() {
-   for (int x=0;x<sizex;x++) {
+   for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
       (*fieldNew)[x][y]=NewState(x,y);
      }
@@ -164,13 +191,13 @@ void Smooth::Update() {
 }
 
 void Smooth::QuickUpdate() {
-  for (int x=0;x<sizex;x++) {
+  for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
     for (int y=0;y<sizey;y++) {
       double ring_total=0.0;
       double disk_total=0.0;
 
-      for (int x1=0;x1<sizex;x1++) {
-          int deltax=TorusDifference(x,x1,sizex);
+      for (int x1=0;x1<local_x_size_with_halo;x1++) {
+          int deltax=TorusDifference(x+x_coordinate_offset,x1+x_coordinate_offset,total_x_size);
           if (deltax>outer+smoothing/2) continue;
 
           for (int y1=0;y1<sizey;y1++) {
@@ -196,31 +223,31 @@ void Smooth::QuickUpdate() {
 }
 
 void Smooth::SeedRandom() {
-   for (int x=0;x<sizex;x++) {
+   for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
       (*field)[x][y]=(static_cast<double>(rand()) / static_cast<double>(RAND_MAX));
      }
    }
 }
 
-void Smooth::SeedDisk() {
-   for (int x=0;x<sizex;x++) {
+void Smooth::SeedDisk(int at_x,int at_y) {
+   for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-      (*field)[x][y]=Disk(Radius(0,0,x,y));
+      (*field)[x][y]=Disk(Radius(at_x-x_coordinate_offset,at_y,x,y));
      }
    }
 }
 
-void Smooth::SeedRing() {
-   for (int x=0;x<sizex;x++) {
+void Smooth::SeedRing(int at_x,int at_y) {
+   for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-      (*field)[x][y]=Ring(Radius(0,0,x,y));
+      (*field)[x][y]=Ring(Radius(at_x-x_coordinate_offset,at_y,x,y));
      }
    }
 }
 
 void Smooth::Write(std::ostream &out) {
-   for (int x=0;x<sizex;x++) {
+   for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
         out << (*field)[x][y] << " , ";
      }
@@ -231,4 +258,45 @@ void Smooth::Write(std::ostream &out) {
 
 int Smooth::Frame() const {
   return frame;
+}
+
+void Smooth::BufferLeftHaloForSend(){
+  for (int x=local_x_min_calculate; x<local_x_min_calculate+range;x++){
+    for (int y=0; y<sizey;y++){
+      send_transport_buffer[y*range+x]=(*field)[x][y];
+    }
+  }
+}
+
+void Smooth::BufferRightHaloForSend(){
+  for (int x=local_x_max_calculate-range; x<local_x_max_calculate;x++){
+    for (int y; y<sizey;y++){
+      send_transport_buffer[y*range+x-local_x_max_calculate+range]=(*field)[x][y];
+    }
+  }
+}
+
+void Smooth::UnpackLeftHaloFromReceive(){
+  for (int x=0; x<range;x++){
+    for (int y=0; y<sizey;y++){
+      (*field)[x][y]=receive_transport_buffer[y*range+x];
+    }
+  }
+}
+
+void Smooth::UnpackRightHaloFromReceive(){
+  for (int x=local_x_max_calculate; x<local_x_size_with_halo;x++){
+    for (int y=0; y<sizey;y++){
+      (*field)[x][y]=receive_transport_buffer[y*range+x-local_x_max_calculate];
+    }
+  }
+}
+
+void Smooth::CommunicateLocal(Smooth &left, Smooth &right){
+  BufferLeftHaloForSend();
+  std::memcpy(left.receive_transport_buffer,send_transport_buffer,sizeof(density)*range*sizey);
+  left.UnpackRightHaloFromReceive();
+  BufferRightHaloForSend();
+  std::memcpy(right.receive_transport_buffer,send_transport_buffer,sizeof(density)*range*sizey);
+  right.UnpackLeftHaloFromReceive();
 }
