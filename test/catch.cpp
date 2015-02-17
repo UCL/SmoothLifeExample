@@ -8,7 +8,7 @@ TEST_CASE( "Smooth model can be instantiated and configured", "[Smooth]" ) {
 
     SECTION( "Smooth can be constructed" ) {
         Smooth smooth;
-        REQUIRE (smooth.Size() == 100);
+        REQUIRE (smooth.Size() == 10000);
         REQUIRE (smooth.Field().size() == 100);
         REQUIRE (smooth.Field()[0].size() == 100);
     }
@@ -60,15 +60,15 @@ TEST_CASE( "Smooth mathematical functions are correct","[Smooth]") {
 
   }
   SECTION ("Wraparound Distance is correct") {
-    REQUIRE(smooth.TorusDifference(95,5) == 10);
-    REQUIRE(smooth.TorusDifference(5,96) == 9);
-    REQUIRE(smooth.TorusDifference(5,10) == 5);
+    REQUIRE(smooth.TorusDifference(95,5,100) == 10);
+    REQUIRE(smooth.TorusDifference(5,96,100) == 9);
+    REQUIRE(smooth.TorusDifference(5,10,100) == 5);
     REQUIRE(smooth.Radius(10,10,13,14)==5.0);
   }
 }
 
 TEST_CASE ("NormalisationsAreCorrect") {
-  Smooth smooth(100,10);
+  Smooth smooth(100,100,10);
   SECTION ("Disk Normalisation is correct") {
     // Should be roughly pi*radius*radius, 
     REQUIRE(std::abs(smooth.NormalisationDisk()-314.15)<1.0);
@@ -97,7 +97,7 @@ TEST_CASE ("FillingsAreUnityWhenSeeded") {
 }
 
 TEST_CASE ("FillingFieldHasRangeofValues") {
-  Smooth smooth(300);
+  Smooth smooth(300,300);
   smooth.SeedRing();
   double min=1.0;
   double max=0.0;
