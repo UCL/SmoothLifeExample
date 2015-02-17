@@ -140,7 +140,9 @@ int Smooth::TorusDifference(int x1, int x2, int size) {
 }
 
 double Smooth::Radius(int x1,int y1,int x2,int y2) const {
-  return std::sqrt(std::pow(TorusDifference(x1+x_coordinate_offset,x2+x_coordinate_offset,total_x_size),2)+std::pow(TorusDifference(y1,y2,sizey),2));
+  int xdiff=TorusDifference(x1+x_coordinate_offset,x2+x_coordinate_offset,total_x_size);
+  int ydiff=TorusDifference(y1,y2,sizey);
+  return std::sqrt(xdiff*xdiff+ydiff*ydiff);
 }
 
 double Smooth::NormalisationDisk() const {
