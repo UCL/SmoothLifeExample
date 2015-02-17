@@ -1,9 +1,18 @@
-#define CATCH_CONFIG_MAIN
 
+// Next line tells CATCH we will use our own main function
+#define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
 #include "Smooth.h"
 #include <cmath>
 #include <mpi.h>
+
+
+int main(int argc, char * argv[]) {
+    MPI_Init (&argc, &argv);
+    int result = Catch::Session().run(argc, argv);
+    MPI_Finalize();
+    return result;
+}
 
 TEST_CASE( "Smooth model can be instantiated and configured", "[Smooth]" ) {
 
