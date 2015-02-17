@@ -4,7 +4,9 @@
 #include <cassert>
 #include <cstring>
 
-#include "smooth.h"
+#include <mpi.h>
+
+#include "Smooth.h"
 
 
 Smooth::Smooth(int sizex,
@@ -21,6 +23,8 @@ Smooth::Smooth(int sizex,
     :
     sizey(sizey),
     inner(inner),
+    rank(rank),
+    mpi_size(mpi_size),
     birth_1(birth_1),
     birth_2(birth_2),
     death_1(death_1),
@@ -47,6 +51,14 @@ Smooth::Smooth(int sizex,
   assert(sizex%mpi_size==0); // WE WILL NOT TRY TO DEAL WITH REMAINDERS
   send_transport_buffer=new density[range*sizey];
   receive_transport_buffer=new density[range*sizey];
+  left=rank-1;
+  right=rank+1;
+  if (rank==0){
+    left=mpi_size-1;
+  }
+  if (rank==mpi_size-1){
+    right=0;
+  }
 }
 
 Smooth::~Smooth(){
@@ -299,4 +311,13 @@ void Smooth::CommunicateLocal(Smooth &left, Smooth &right){
   BufferRightHaloForSend();
   std::memcpy(right.receive_transport_buffer,send_transport_buffer,sizeof(density)*range*sizey);
   right.UnpackLeftHaloFromReceive();
+}
+
+void Smooth::CommunicateMPI(){
+  BufferLeftHaloForSend();
+  MPI_Sendrecv(send_transport_buffer,range*sizey,MPI_Double,left,rank,receive_transport_buffer,range*sizey,MPI_Double,right,right,MPI_COMM_WORLD);
+  UnpackRightHaloFromReceive();
+  BufferRightHaloForSend();
+  MPI_Sendrecv(send_transport_buffer,range*sizey,MPI_Double,right,mpi_size+rank,receive_transport_buffer,range*sizey,MPI_Double,left,mpi_size+left,MPI_COMM_WORLD);
+  UnpackLeftHaloFromReceive();
 }

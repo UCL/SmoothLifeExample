@@ -47,6 +47,7 @@ class Smooth {
     void Write(std::ostream &out);
     int Frame() const;
     void CommunicateLocal(Smooth &left_neighbour, Smooth &right_neighbour);
+    void CommunicateMPI();
     void BufferLeftHaloForSend();
     void BufferRightHaloForSend();
     void UnpackRightHaloFromReceive();
@@ -54,6 +55,10 @@ class Smooth {
   private:
     int sizey;
     distance inner;
+    int rank;
+    int mpi_size;
+    int left; // MPI rank of left neighbour
+    int right; // MPI rank of right neighbour
     filling birth_1;
     filling birth_2;
     filling death_1;

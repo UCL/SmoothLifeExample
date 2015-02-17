@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include "catch.hpp"
-#include "smooth.h"
+#include "Smooth.h"
 #include <cmath>
 
 TEST_CASE( "Smooth model can be instantiated and configured", "[Smooth]" ) {
@@ -124,4 +124,19 @@ TEST_CASE ("CommunicationBufferingFunctionsCorrectly") {
   smooth.CommunicateLocal(smooth2,smooth2); // Transport the data
   REQUIRE(abs(smooth.FillingDisk(0,0)-0.5)<0.1);
   REQUIRE(abs(smooth2.FillingDisk(84,0)-0.5)<0.1);
+}
+
+TEST_CASE ("MPI Tests"){
+    int rank, size;
+    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+    MPI_Comm_size (MPI_COMM_WORLD, &size);
+    SECTION("Basic ring communication works"){
+       Smooth smooth(200,100,5,rank,size);
+       smooth.SeedDisk(); // Half the Seeded Disk falls in smooth2's domain, so total filling will be half a disk.
+       REQUIRE(abs(smooth.FillingDisk(15,0)-0.5)<0.1);
+       REQUIRE(smooth2.FillingDisk(84,0)==0.0);
+       smooth.CommunicateMPI();
+       REQUIRE(abs(smooth.FillingDisk(0,0)-0.5)<0.1);
+       REQUIRE(abs(smooth2.FillingDisk(84,0)-0.5)<0.1);
+    }
 }
