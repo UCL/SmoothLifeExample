@@ -62,8 +62,8 @@ Smooth::Smooth(int sizex,
 }
 
 Smooth::~Smooth(){
-  delete send_transport_buffer;
-  delete receive_transport_buffer;
+  delete[] send_transport_buffer;
+  delete[] receive_transport_buffer;
 }
 
 int Smooth::Range(){
@@ -277,7 +277,7 @@ int Smooth::Frame() const {
 void Smooth::BufferLeftHaloForSend(){
   for (int x=local_x_min_calculate; x<local_x_min_calculate+range;x++){
     for (int y=0; y<sizey;y++){
-      send_transport_buffer[y*range+x]=(*field)[x][y];
+      send_transport_buffer[y*range+x-local_x_min_calculate]=(*field)[x][y];
     }
   }
 }
