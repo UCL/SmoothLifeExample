@@ -315,9 +315,13 @@ void Smooth::CommunicateLocal(Smooth &left, Smooth &right){
 
 void Smooth::CommunicateMPI(){
   BufferLeftHaloForSend();
-  MPI_Sendrecv(send_transport_buffer,range*sizey,MPI_DOUBLE,left,rank,receive_transport_buffer,range*sizey,MPI_DOUBLE,right,right,MPI_COMM_WORLD);
+  MPI_Sendrecv(send_transport_buffer,range*sizey,MPI_DOUBLE,left,rank,
+      receive_transport_buffer, range*sizey,MPI_DOUBLE,right,right,
+      MPI_COMM_WORLD,MPI_STATUS_IGNORE);
   UnpackRightHaloFromReceive();
   BufferRightHaloForSend();
-  MPI_Sendrecv(send_transport_buffer,range*sizey,MPI_DOUBLE,right,mpi_size+rank,receive_transport_buffer,range*sizey,MPI_DOUBLE,left,mpi_size+left,MPI_COMM_WORLD);
+  MPI_Sendrecv(send_transport_buffer,range*sizey,MPI_DOUBLE,right,mpi_size+rank,
+      receive_transport_buffer,range*sizey,MPI_DOUBLE,left,mpi_size+left,
+      MPI_COMM_WORLD,MPI_STATUS_IGNORE);
   UnpackLeftHaloFromReceive();
 }
