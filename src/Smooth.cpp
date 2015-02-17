@@ -282,7 +282,7 @@ void Smooth::BufferLeftHaloForSend(){
 
 void Smooth::BufferRightHaloForSend(){
   for (int x=local_x_max_calculate-range; x<local_x_max_calculate;x++){
-    for (int y; y<sizey;y++){
+    for (int y=0; y<sizey;y++){
       send_transport_buffer[y*range+x-local_x_max_calculate+range]=(*field)[x][y];
     }
   }
