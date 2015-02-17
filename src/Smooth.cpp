@@ -33,6 +33,10 @@ Smooth::Smooth(int size,
   normalisation_ring=NormalisationRing();
 }
 
+int Smooth::Range(){
+  return outer+smoothing/2;
+}
+
 int Smooth::Size(){
   return size;
 }

@@ -16,6 +16,7 @@ class Smooth {
     filling smoothing_disk=0.147,
     filling smoothing_ring=0.028);
     int Size();
+    int Range();
     const std::vector<std::vector<density> > & Field() const;
     double Disk(distance radius) const;
     double Ring(distance radius) const;
