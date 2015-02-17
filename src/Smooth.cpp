@@ -101,7 +101,9 @@ int Smooth::TorusDifference(int x1, int x2, int size) const {
 }
 
 double Smooth::Radius(int x1,int y1,int x2,int y2) const {
-  return std::sqrt(std::pow(TorusDifference(x1,x2,sizex),2)+std::pow(TorusDifference(y1,y2,sizey),2));
+  int xdiff=TorusDifference(x1,x2,sizex);
+  int ydiff=TorusDifference(y1,y2,sizey);
+  return std::sqrt(xdiff*xdiff+ydiff*ydiff);
 }
 
 double Smooth::NormalisationDisk() const {
