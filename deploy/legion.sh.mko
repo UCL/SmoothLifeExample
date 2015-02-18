@@ -3,7 +3,7 @@
 #$ -P RCSoftDev
 #$ -l h_rt=0:10:0
 #$ -N SmoothLife
-#$ -pe openmpi 4
+#$ -pe openmpi ${processes}
 #$ -wd ${run_at}
 module unload compilers
 module unload mpi

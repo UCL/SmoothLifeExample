@@ -37,7 +37,8 @@ def warm():
                         run('test/catch')
 
 @task
-def sub():
+def sub(processes=4):
+    env.processes=processes
     template_file_path=os.path.join(os.path.dirname(__file__),'legion.sh.mko')
     script_local_path=os.path.join(os.path.dirname(__file__),'legion.sh')
     config_file_path=os.path.join(os.path.dirname(os.path.dirname(__file__)),'config.yml')
