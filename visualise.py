@@ -11,7 +11,7 @@ with open(os.path.join(folder,'test0.dat')) as data:
     rows=header[0]
     
 process_frames=[]
-for process in range(4):
+for process in range(header[3]):
     data=numpy.genfromtxt(os.path.join(folder,'test'+str(process)+'.dat'),delimiter=",",skip_header=1)[:,:-1]
     lines, columns=data.shape
     process_frames.append(data.reshape((lines/rows,rows,columns)))
