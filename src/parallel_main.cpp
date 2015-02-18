@@ -11,7 +11,7 @@ int main(int argc, char **argv){
   MPI_Comm_rank (MPI_COMM_WORLD, &rank);
   MPI_Comm_size (MPI_COMM_WORLD, &size);
   std::string config_path = argv[1];
-  std::ifstream config_file(config_path);
+  std::ifstream config_file(config_path.c_str());
   int width;
   int height;
   int range;
