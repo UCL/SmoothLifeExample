@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include "catch.hpp"
-#include "smooth.h"
+#include "Smooth.h"
 #include <cmath>
 
 TEST_CASE( "Smooth model can be instantiated and configured", "[Smooth]" ) {
