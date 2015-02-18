@@ -247,7 +247,10 @@ void Smooth::SeedRandom() {
 void Smooth::SeedDisk(int at_x,int at_y) {
    for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-      (*field)[x][y]=Disk(Radius(at_x-x_coordinate_offset,at_y,x,y));
+      (*field)[x][y]+=Disk(Radius(at_x-x_coordinate_offset,at_y,x,y));
+      if ((*field)[x][y]>1){
+        (*field)[x][y]=1.0;
+      }
      }
    }
 }
@@ -255,7 +258,10 @@ void Smooth::SeedDisk(int at_x,int at_y) {
 void Smooth::SeedRing(int at_x,int at_y) {
    for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-      (*field)[x][y]=Ring(Radius(at_x-x_coordinate_offset,at_y,x,y));
+      (*field)[x][y]+=Ring(Radius(at_x-x_coordinate_offset,at_y,x,y));
+       if ((*field)[x][y]>1){
+        (*field)[x][y]=1.0;
+      }
      }
    }
 }
