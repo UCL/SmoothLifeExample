@@ -266,6 +266,12 @@ void Smooth::SeedRing(int at_x,int at_y) {
    }
 }
 
+void Smooth::SeedRandomDisk() {
+  int x=rand()%total_x_size;
+  int y=rand()%sizey;
+  SeedDisk(x,y);
+}
+
 void Smooth::Write(std::ostream &out) {
    for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {

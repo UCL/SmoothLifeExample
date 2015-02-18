@@ -40,6 +40,7 @@ class Smooth {
     filling FillingDisk(int x,int y) const;
     density NewState(int x, int y) const;
     void SeedRandom();
+    void SeedRandomDisk();
     void SeedDisk(int at_x=0,int at_y=0);
     void SeedRing(int at_x=0,int at_y=0);
     void Update();
