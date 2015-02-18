@@ -36,4 +36,21 @@ TEST_CASE ("MPI Tests"){
          REQUIRE(abs(smooth.FillingDisk(84,0)-0.5)<0.1);
        }
     }
+
+    SECTION("Behaviour unchanged by parallelisation"){
+       Smooth smooth(100,100,5,0,1);
+       smooth.SeedDisk();
+       smooth.QuickUpdate();
+    
+       Smooth paraSmooth(100,100,5,rank,size);
+       paraSmooth.SeedDisk();
+       paraSmooth.CommunicateMPI();
+       paraSmooth.QuickUpdate();
+       paraSmooth.CommunicateMPI();
+       for (unsigned int x=0;x<50;x++){
+         for (unsigned int y=0;y<100;y++){
+           REQUIRE(abs(smooth.Field()[x+15+rank*50][y] - paraSmooth.Field()[x+15][y])<0.01);
+         }
+       }
+    }
 }
