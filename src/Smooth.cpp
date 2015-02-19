@@ -385,8 +385,8 @@ void Smooth::InitiateLeftComms(){
 }
 
 void Smooth::InitiateRightComms(){
-  MPI_Isend(*field+sizey*local_x_min_needed_right,1,halo_type,left,rank,MPI_COMM_WORLD,&request_right);
-  MPI_Irecv(*field,1,halo_type,right,right,MPI_COMM_WORLD,&request_right);
+  MPI_Isend(*field+sizey*local_x_min_needed_right,1,halo_type,right,mpi_size+rank,MPI_COMM_WORLD,&request_right);
+  MPI_Irecv(*field,1,halo_type,left,mpi_size+left,MPI_COMM_WORLD,&request_right);
 }
 
 void Smooth::ResolveLeftComms(){
