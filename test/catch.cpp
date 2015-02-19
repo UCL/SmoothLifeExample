@@ -51,10 +51,10 @@ TEST_CASE( "Smooth mathematical functions are correct","[Smooth]") {
     REQUIRE(std::abs(Smooth::Sigmoid(0.0,1.0,0.1)) < 0.001);
   }
   SECTION ("Transition function is correct") {
-    REQUIRE(abs(smooth.transition(1.0,0.3) - 1.0) <0.1);
+    REQUIRE(std::abs(smooth.transition(1.0,0.3) - 1.0) <0.1);
     REQUIRE(smooth.transition(1.0,1.0)==0.0);
-    REQUIRE(abs(smooth.transition(0.0,0.3)-1.0) < 0.1);
-    REQUIRE(abs(smooth.transition(0.0,0.0)) < 0.1);
+    REQUIRE(std::abs(smooth.transition(0.0,0.3)-1.0) < 0.1);
+    REQUIRE(std::abs(smooth.transition(0.0,0.0)) < 0.1);
 
   }
   SECTION ("Wraparound Distance is correct") {
@@ -81,16 +81,16 @@ TEST_CASE ("FillingsAreUnityWhenSeeded") {
   Smooth smooth;
   SECTION ("DiskFillingUnityWithDiskSeed") {
     smooth.SeedDisk();
-    REQUIRE(abs(smooth.FillingDisk(0,0)-1.0)<0.1);
+    REQUIRE(std::abs(smooth.FillingDisk(0,0)-1.0)<0.1);
   }
 
   SECTION ("Disk Filling Zero With Ring Seed") {
     smooth.SeedRing();
-    REQUIRE(abs(smooth.FillingDisk(0,0))<0.1);
+    REQUIRE(std::abs(smooth.FillingDisk(0,0))<0.1);
   }
   SECTION ("RingFillingUnityWithRingSeed") {
     smooth.SeedRing();
-    REQUIRE(abs(smooth.FillingRing(0,0)-1.0)<0.1);
+    REQUIRE(std::abs(smooth.FillingRing(0,0)-1.0)<0.1);
   }
 }
 
@@ -117,9 +117,9 @@ TEST_CASE ("CommunicationBufferingFunctionsCorrectly") {
   REQUIRE(smooth2.Radius(0,0,0,0)==0);
   smooth.SeedDisk(); // Half the Seeded Disk falls in smooth2's domain, so total filling will be half a disk.
   REQUIRE(smooth.Field(15,0)==1.0);
-  REQUIRE(abs(smooth.FillingDisk(15,0)-0.5)<0.1);
+  REQUIRE(std::abs(smooth.FillingDisk(15,0)-0.5)<0.1);
   REQUIRE(smooth2.FillingDisk(84,0)==0.0);
   smooth.CommunicateLocal(smooth2,smooth2); // Transport the data
-  REQUIRE(abs(smooth.FillingDisk(0,0)-0.5)<0.1);
-  REQUIRE(abs(smooth2.FillingDisk(84,0)-0.5)<0.1);
+  REQUIRE(std::abs(smooth.FillingDisk(0,0)-0.5)<0.1);
+  REQUIRE(std::abs(smooth2.FillingDisk(84,0)-0.5)<0.1);
 }
