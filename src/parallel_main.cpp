@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include <ctime>
 #include "Smooth.h"
 #include <mpi.h>
 
