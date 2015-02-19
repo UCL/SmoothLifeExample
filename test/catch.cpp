@@ -1,8 +1,20 @@
-#define CATCH_CONFIG_MAIN
+// Next line tells CATCH we will use our own main function
+#define CATCH_CONFIG_RUNNER
 
 #include "catch.hpp"
 #include "Smooth.h"
 #include <cmath>
+
+
+int main(int argc, char * argv[]) {
+    MPI_Init (&argc, &argv);
+    int result = Catch::Session().run(argc, argv);
+    MPI_Finalize();
+    return result;
+}
+
+
+
 
 TEST_CASE( "Smooth model can be instantiated and configured", "[Smooth]" ) {
 
@@ -81,16 +93,16 @@ TEST_CASE ("FillingsAreUnityWhenSeeded") {
   Smooth smooth;
   SECTION ("DiskFillingUnityWithDiskSeed") {
     smooth.SeedDisk();
-    REQUIRE(std::abs(smooth.FillingDisk(0,0)-1.0)<0.1);
+    REQUIRE(std::abs(smooth.FillingDisk(63,0)-1.0)<0.1);
   }
 
   SECTION ("Disk Filling Zero With Ring Seed") {
     smooth.SeedRing();
-    REQUIRE(std::abs(smooth.FillingDisk(0,0))<0.1);
+    REQUIRE(std::abs(smooth.FillingDisk(63,0))<0.1);
   }
   SECTION ("RingFillingUnityWithRingSeed") {
     smooth.SeedRing();
-    REQUIRE(std::abs(smooth.FillingRing(0,0)-1.0)<0.1);
+    REQUIRE(std::abs(smooth.FillingRing(63,0)-1.0)<0.1);
   }
 }
 
@@ -118,8 +130,9 @@ TEST_CASE ("CommunicationBufferingFunctionsCorrectly") {
   smooth.SeedDisk(); // Half the Seeded Disk falls in smooth2's domain, so total filling will be half a disk.
   REQUIRE(smooth.Field(15,0)==1.0);
   REQUIRE(std::abs(smooth.FillingDisk(15,0)-0.5)<0.1);
-  REQUIRE(smooth2.FillingDisk(84,0)==0.0);
+  REQUIRE(smooth2.FillingDisk(85,0)==0.0);
   smooth.CommunicateLocal(smooth2,smooth2); // Transport the data
-  REQUIRE(std::abs(smooth.FillingDisk(0,0)-0.5)<0.1);
-  REQUIRE(std::abs(smooth2.FillingDisk(84,0)-0.5)<0.1);
+  REQUIRE(std::abs(smooth.FillingDisk(15,0)-0.5)<0.1);
+  REQUIRE(smooth2.Field(115,0)==1.0);
+  REQUIRE(std::abs(smooth2.FillingDisk(115,0)-0.5)<0.1);
 }
