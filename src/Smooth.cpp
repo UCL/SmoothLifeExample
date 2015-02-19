@@ -133,11 +133,11 @@ void Smooth::SetNewField(int x, int y, density value){
 }
 
 void Smooth::SetField(int x, int y, density value){
-  (*field)[x][y]+=value;
+  (*field)[x][y]=value;
 }
 
 void Smooth::SeedField(int x, int y, density value){
-  SetField(x,y,value);
+  SetField(x,y,value+Field(x,y));
   if (Field(x,y)>1.0){
      SetField(x,y,1.0);
   }
