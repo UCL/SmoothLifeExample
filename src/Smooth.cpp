@@ -41,8 +41,8 @@ Smooth::Smooth(int sizex,
     x_coordinate_offset(rank*local_x_size-range),
     local_x_min_calculate(range),
     local_x_max_calculate(range+local_x_size),
-    field1(local_x_size_with_halo,std::vector<density>(sizey)),
-    field2(local_x_size_with_halo,std::vector<density>(sizey)),
+    field1(new density[local_x_size_with_halo*sizey]),
+    field2(new density[local_x_size_with_halo*sizey]),
     field(&field1),
     fieldNew(&field2)
 {
@@ -59,6 +59,7 @@ Smooth::Smooth(int sizex,
   if (rank==mpi_size-1){
     right=0;
   }
+  DefineHaloDatatype();
 }
 
 Smooth::~Smooth(){
@@ -125,15 +126,15 @@ density Smooth::transition(filling disk, filling ring) const {
 }
 
 density Smooth::Field(int x,int y) const {
-  return (*field)[x][y];
+  return (*field)[sizey*x+y];
 };
 
 void Smooth::SetNewField(int x, int y, density value){
-  (*fieldNew)[x][y]=value;
+  (*fieldNew)[sizey*x + y]=value;
 }
 
 void Smooth::SetField(int x, int y, density value){
-  (*field)[x][y]=value;
+  (*field)[sizey*x + y]=value;
 }
 
 void Smooth::SeedField(int x, int y, density value){
@@ -224,7 +225,6 @@ void Smooth::QuickUpdate() {
     for (int y=0;y<sizey;y++) {
       double ring_total=0.0;
       double disk_total=0.0;
-
       for (int x1=0;x1<local_x_size_with_halo;x1++) {
           int deltax=TorusDifference(x+x_coordinate_offset,x1+x_coordinate_offset,total_x_size);
           if (deltax>outer+smoothing/2) continue;
@@ -347,4 +347,16 @@ void Smooth::CommunicateMPI(){
       receive_transport_buffer,range*sizey,MPI_DOUBLE,left,mpi_size+left,
       MPI_COMM_WORLD,MPI_STATUS_IGNORE);
   UnpackLeftHaloFromReceive();
+}
+
+void Smooth::DefineHaloDatatype(){
+  MPI_Type_contiguous(sizey*range,MPI_DOUBLE,&halo_type);
+  MPI_Type_commit(&halo_type);
+}
+
+void Smooth::CommunicateMPIDerivedDatatype(){
+  MPI_Sendrecv(                       (*field),1,halo_type,left,rank,
+               (*field)+sizey*(local_x_size+range),1,halo_type,right,right,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+  MPI_Sendrecv((*field)+sizey*(local_x_size+range),1,halo_type,right,mpi_size+rank,
+                                      (*field),1,halo_type,left,mpi_size+left,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 }
