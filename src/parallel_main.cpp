@@ -72,7 +72,7 @@ int main(int argc, char **argv){
   for (unsigned int frame=0; frame<frames; frame++) {
     frame_times[frame]=std::clock();
     smooth.Write(outfile);
-    smooth.CommunicateMPI();
+    smooth.CommunicateMPIDerivedDatatype();
     smooth.QuickUpdate();
     std::cout << "Rank " << rank << " completed frame: " << smooth.Frame() << std::endl;
   }
