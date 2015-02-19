@@ -211,7 +211,7 @@ void Smooth::Update() {
      }
    }
 
-  std::vector<std::vector<density> > * fieldTemp;
+  t_field * fieldTemp;
   fieldTemp=field;
   field=fieldNew;
   fieldNew=fieldTemp;
