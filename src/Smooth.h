@@ -53,6 +53,7 @@ class Smooth {
     int Frame() const;
     void CommunicateLocal(Smooth &left_neighbour, Smooth &right_neighbour);
     void CommunicateMPI();
+    void CommunicateMPIUnbuffered();
     void CommunicateMPIDerivedDatatype();
     void BufferLeftHaloForSend();
     void BufferRightHaloForSend();

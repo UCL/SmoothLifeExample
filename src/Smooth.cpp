@@ -349,14 +349,23 @@ void Smooth::CommunicateMPI(){
   UnpackLeftHaloFromReceive();
 }
 
+void Smooth::CommunicateMPIUnbuffered(){
+  MPI_Sendrecv((*field)+sizey*range,range*sizey,MPI_DOUBLE,left,rank,
+      (*field)+sizey*local_x_max_calculate, range*sizey,MPI_DOUBLE,right,right,
+      MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+  MPI_Sendrecv((*field)+sizey*(local_x_max_calculate-range),range*sizey,MPI_DOUBLE,right,mpi_size+rank,
+      (*field),range*sizey,MPI_DOUBLE,left,mpi_size+left,
+      MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+}
+
 void Smooth::DefineHaloDatatype(){
   MPI_Type_contiguous(sizey*range,MPI_DOUBLE,&halo_type);
   MPI_Type_commit(&halo_type);
 }
 
 void Smooth::CommunicateMPIDerivedDatatype(){
-  MPI_Sendrecv(                       (*field),1,halo_type,left,rank,
-               (*field)+sizey*(local_x_size+range),1,halo_type,right,right,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-  MPI_Sendrecv((*field)+sizey*(local_x_size+range),1,halo_type,right,mpi_size+rank,
+  MPI_Sendrecv(                       (*field)+sizey*range,1,halo_type,left,rank,
+               (*field)+sizey*local_x_max_calculate,1,halo_type,right,right,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+  MPI_Sendrecv((*field)+sizey*(local_x_max_calculate-range),1,halo_type,right,mpi_size+rank,
                                       (*field),1,halo_type,left,mpi_size+left,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 }
