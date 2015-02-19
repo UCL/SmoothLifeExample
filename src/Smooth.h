@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <mpi.h>
 
 typedef double density;
 typedef double distance;
@@ -52,6 +53,7 @@ class Smooth {
     int Frame() const;
     void CommunicateLocal(Smooth &left_neighbour, Smooth &right_neighbour);
     void CommunicateMPI();
+    void CommunicateMPIDerivedDatatype();
     void BufferLeftHaloForSend();
     void BufferRightHaloForSend();
     void UnpackRightHaloFromReceive();
@@ -88,5 +90,7 @@ class Smooth {
     t_field *fieldNew;
     density *send_transport_buffer;
     density *receive_transport_buffer;
+    MPI_Datatype halo_type;
+    void DefineHaloDatatype();
 };
 
