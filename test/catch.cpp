@@ -9,8 +9,6 @@ TEST_CASE( "Smooth model can be instantiated and configured", "[Smooth]" ) {
     SECTION( "Smooth can be constructed" ) {
         Smooth smooth;
         REQUIRE (smooth.Size() == 10000);
-        REQUIRE (smooth.Field().size() == 100+63+63);
-        REQUIRE (smooth.Field()[0].size() == 100);
     }
 }
 
@@ -118,7 +116,7 @@ TEST_CASE ("CommunicationBufferingFunctionsCorrectly") {
   REQUIRE(smooth.Radius(0,0,0,0)==0);
   REQUIRE(smooth2.Radius(0,0,0,0)==0);
   smooth.SeedDisk(); // Half the Seeded Disk falls in smooth2's domain, so total filling will be half a disk.
-  REQUIRE(smooth.Field()[15][0]==1.0);
+  REQUIRE(smooth.Field(15,0)==1.0);
   REQUIRE(abs(smooth.FillingDisk(15,0)-0.5)<0.1);
   REQUIRE(smooth2.FillingDisk(84,0)==0.0);
   smooth.CommunicateLocal(smooth2,smooth2); // Transport the data

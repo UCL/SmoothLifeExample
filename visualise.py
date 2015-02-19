@@ -19,6 +19,7 @@ frames=numpy.concatenate(process_frames, 1)
 
 figure=matplotlib.pyplot.figure()
 def animate(frame_id):
+    print "Processing frame", frame_id
     matplotlib.pyplot.imshow(frames[frame_id],vmin=0,vmax=1)
 
 anim=matplotlib.animation.FuncAnimation(figure,animate,frames=len(frames),interval=100)

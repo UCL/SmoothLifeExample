@@ -27,7 +27,10 @@ class Smooth {
     int LocalXSize();
     int Sizey();
     int Range();
-    const std::vector<std::vector<density> > & Field() const;
+    density Field(int x, int y) const;
+    void SetNewField(int x, int y, density value);
+    void SeedField(int x, int y, density value);
+    void SetField(int x, int y, density value);
     double Disk(distance radius) const;
     double Ring(distance radius) const;
     static double Sigmoid(double variable, double center, double width);

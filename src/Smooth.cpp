@@ -124,9 +124,24 @@ density Smooth::transition(filling disk, filling ring) const {
   return Sigmoid(ring,t1,smoothing_ring)*(1.0-Sigmoid(ring,t2,smoothing_ring));
 }
 
-const std::vector<std::vector<density> > & Smooth::Field() const {
-  return *field;
+density Smooth::Field(int x,int y) const {
+  return (*field)[x][y];
 };
+
+void Smooth::SetNewField(int x, int y, density value){
+  (*fieldNew)[x][y]=value;
+}
+
+void Smooth::SetField(int x, int y, density value){
+  (*field)[x][y]+=value;
+}
+
+void Smooth::SeedField(int x, int y, density value){
+  SetField(x,y,value);
+  if (Field(x,y)>1.0){
+     SetField(x,y,1.0);
+  }
+}
 
 int Smooth::TorusDifference(int x1, int x2, int size) {
     int straight=std::abs(x2-x1);
@@ -169,7 +184,7 @@ filling Smooth::FillingDisk(int x, int y) const {
   double total=0.0;
   for (int x1=0;x1<local_x_size_with_halo;x1++) {
      for (int y1=0;y1<sizey;y1++) {
-       total+=(*field)[x1][y1]*Disk(Radius(x,y,x1,y1));
+       total+=Field(x1,y1)*Disk(Radius(x,y,x1,y1));
     }
   };
   return total/normalisation_disk;
@@ -179,7 +194,7 @@ filling Smooth::FillingRing(int x, int y) const {
   double total=0.0;
   for (int x1=0;x1<local_x_size_with_halo;x1++) {
      for (int y1=0;y1<sizey;y1++) {
-       total+=(*field)[x1][y1]*Ring(Radius(x,y,x1,y1));
+       total+=Field(x1,y1)*Ring(Radius(x,y,x1,y1));
     }
   };
   return total/normalisation_ring;
@@ -192,7 +207,7 @@ density Smooth::NewState(int x, int y) const {
 void Smooth::Update() {
    for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-      (*fieldNew)[x][y]=NewState(x,y);
+      SetNewField(x,y,NewState(x,y));
      }
    }
 
@@ -219,13 +234,13 @@ void Smooth::QuickUpdate() {
             if (deltay>outer+smoothing/2) continue;
 
             double radius=std::sqrt(deltax*deltax+deltay*deltay);
-            double fieldv=(*field)[x1][y1];
+            double fieldv=Field(x1,y1);
             ring_total+=fieldv*Ring(radius);
             disk_total+=fieldv*Disk(radius);
           }
       }
 
-      (*fieldNew)[x][y]=transition(disk_total/normalisation_disk,ring_total/normalisation_ring);
+      SetNewField(x,y,transition(disk_total/normalisation_disk,ring_total/normalisation_ring));
     }
   }
 
@@ -239,7 +254,7 @@ void Smooth::QuickUpdate() {
 void Smooth::SeedRandom() {
    for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-      (*field)[x][y]=(static_cast<double>(rand()) / static_cast<double>(RAND_MAX));
+      SeedField(x,y,(static_cast<double>(rand()) / static_cast<double>(RAND_MAX)));
      }
    }
 }
@@ -247,10 +262,7 @@ void Smooth::SeedRandom() {
 void Smooth::SeedDisk(int at_x,int at_y) {
    for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-      (*field)[x][y]+=Disk(Radius(at_x-x_coordinate_offset,at_y,x,y));
-      if ((*field)[x][y]>1){
-        (*field)[x][y]=1.0;
-      }
+      SeedField(x,y,Disk(Radius(at_x-x_coordinate_offset,at_y,x,y)));
      }
    }
 }
@@ -258,10 +270,7 @@ void Smooth::SeedDisk(int at_x,int at_y) {
 void Smooth::SeedRing(int at_x,int at_y) {
    for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-      (*field)[x][y]+=Ring(Radius(at_x-x_coordinate_offset,at_y,x,y));
-       if ((*field)[x][y]>1){
-        (*field)[x][y]=1.0;
-      }
+      SeedField(x,y,Ring(Radius(at_x-x_coordinate_offset,at_y,x,y)));
      }
    }
 }
@@ -275,7 +284,7 @@ void Smooth::SeedRandomDisk() {
 void Smooth::Write(std::ostream &out) {
    for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
      for (int y=0;y<sizey;y++) {
-        out << (*field)[x][y] << " , ";
+        out << Field(x,y) << " , ";
      }
      out << std::endl;
    }
@@ -289,7 +298,7 @@ int Smooth::Frame() const {
 void Smooth::BufferLeftHaloForSend(){
   for (int x=local_x_min_calculate; x<local_x_min_calculate+range;x++){
     for (int y=0; y<sizey;y++){
-      send_transport_buffer[y*range+x-local_x_min_calculate]=(*field)[x][y];
+      send_transport_buffer[y*range+x-local_x_min_calculate]=Field(x,y);
     }
   }
 }
@@ -297,7 +306,7 @@ void Smooth::BufferLeftHaloForSend(){
 void Smooth::BufferRightHaloForSend(){
   for (int x=local_x_max_calculate-range; x<local_x_max_calculate;x++){
     for (int y=0; y<sizey;y++){
-      send_transport_buffer[y*range+x-local_x_max_calculate+range]=(*field)[x][y];
+      send_transport_buffer[y*range+x-local_x_max_calculate+range]=Field(x,y);
     }
   }
 }
@@ -305,7 +314,7 @@ void Smooth::BufferRightHaloForSend(){
 void Smooth::UnpackLeftHaloFromReceive(){
   for (int x=0; x<range;x++){
     for (int y=0; y<sizey;y++){
-      (*field)[x][y]=receive_transport_buffer[y*range+x];
+      SetField(x,y,receive_transport_buffer[y*range+x]);
     }
   }
 }
@@ -313,7 +322,7 @@ void Smooth::UnpackLeftHaloFromReceive(){
 void Smooth::UnpackRightHaloFromReceive(){
   for (int x=local_x_max_calculate; x<local_x_size_with_halo;x++){
     for (int y=0; y<sizey;y++){
-      (*field)[x][y]=receive_transport_buffer[y*range+x-local_x_max_calculate];
+      SetField(x,y,receive_transport_buffer[y*range+x-local_x_max_calculate]);
     }
   }
 }

@@ -49,7 +49,7 @@ TEST_CASE ("MPI Tests"){
        paraSmooth.CommunicateMPI();
        for (unsigned int x=0;x<50;x++){
          for (unsigned int y=0;y<100;y++){
-           REQUIRE(abs(smooth.Field()[x+15+rank*50][y] - paraSmooth.Field()[x+15][y])<0.01);
+           REQUIRE(abs(smooth.Field(x+15+rank*50,y) - paraSmooth.Field(x+15,y))<0.01);
          }
        }
     }
