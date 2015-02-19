@@ -1,8 +1,8 @@
 // Next line tells CATCH we will use our own main function
 #define CATCH_CONFIG_RUNNER
+#include <cmath>
 #include "catch.hpp"
 #include "Smooth.h"
-#include <cmath>
 #include <mpi.h>
 
 
@@ -54,21 +54,31 @@ TEST_CASE ("MPI Tests"){
        }
     }
     
-    SECTION("Behaviour unchanged by parallelisation"){
+    SECTION("Behaviour unchanged by parallelisation with derived datatype"){
        Smooth smooth(100,100,5,0,1);
-       smooth.SeedDisk();
-       smooth.QuickUpdate();
+       smooth.SeedRing();
+       smooth.SeedRing(50,50);
     
        Smooth paraSmooth(100,100,5,rank,size);
-       paraSmooth.SeedDisk();
+       paraSmooth.SeedRing();
+       paraSmooth.SeedRing(50,50);
        paraSmooth.CommunicateMPIDerivedDatatype();
-       paraSmooth.QuickUpdate();
-       paraSmooth.CommunicateMPIDerivedDatatype();
+       
        for (unsigned int x=0;x<50;x++){
          for (unsigned int y=0;y<100;y++){
-           REQUIRE(abs(smooth.Field(x+15+rank*50,y) - paraSmooth.Field(x+15,y))<0.01);
+           REQUIRE(std::abs(smooth.Field(x+15+rank*50,y) - paraSmooth.Field(x+15,y))<0.00001);
          }
        }
+       smooth.QuickUpdate();
+       paraSmooth.QuickUpdate();
+       paraSmooth.CommunicateMPIDerivedDatatype();
+      
+       for (unsigned int x=0;x<50;x++){
+         for (unsigned int y=0;y<100;y++){
+           REQUIRE(std::abs(smooth.Field(x+15+rank*50,y) - paraSmooth.Field(x+15,y))<0.00001);
+         }
+       }
+
     }
 
 }
