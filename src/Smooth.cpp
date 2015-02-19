@@ -40,7 +40,9 @@ Smooth::Smooth(int sizex,
     total_x_size(sizex),
     x_coordinate_offset(rank*local_x_size-range),
     local_x_min_calculate(range),
+    local_x_max_needed_left(2*range),
     local_x_max_calculate(range+local_x_size),
+    local_x_min_needed_right(local_x_size),
     field1(new density[local_x_size_with_halo*sizey]),
     field2(new density[local_x_size_with_halo*sizey]),
     field(&field1),
@@ -353,7 +355,7 @@ void Smooth::CommunicateMPIUnbuffered(){
   MPI_Sendrecv((*field)+sizey*range,range*sizey,MPI_DOUBLE,left,rank,
       (*field)+sizey*local_x_max_calculate, range*sizey,MPI_DOUBLE,right,right,
       MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-  MPI_Sendrecv((*field)+sizey*(local_x_max_calculate-range),range*sizey,MPI_DOUBLE,right,mpi_size+rank,
+  MPI_Sendrecv((*field)+sizey*local_x_min_needed_right,range*sizey,MPI_DOUBLE,right,mpi_size+rank,
       (*field),range*sizey,MPI_DOUBLE,left,mpi_size+left,
       MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 }
@@ -364,8 +366,8 @@ void Smooth::DefineHaloDatatype(){
 }
 
 void Smooth::CommunicateMPIDerivedDatatype(){
-  MPI_Sendrecv(                       (*field)+sizey*range,1,halo_type,left,rank,
+  MPI_Sendrecv(                       (*field)+sizey*local_x_min_calculate,1,halo_type,left,rank,
                (*field)+sizey*local_x_max_calculate,1,halo_type,right,right,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-  MPI_Sendrecv((*field)+sizey*(local_x_max_calculate-range),1,halo_type,right,mpi_size+rank,
+  MPI_Sendrecv((*field)+sizey*local_x_min_needed_right,1,halo_type,right,mpi_size+rank,
                                       (*field),1,halo_type,left,mpi_size+left,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 }

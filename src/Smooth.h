@@ -83,7 +83,9 @@ class Smooth {
     int total_x_size;
     int x_coordinate_offset;
     int local_x_min_calculate;
+    int local_x_max_needed_left;
     int local_x_max_calculate;
+    int local_x_min_needed_right;
     typedef density* t_field;
     t_field field1;
     t_field field2;
