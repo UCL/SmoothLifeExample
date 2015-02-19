@@ -81,10 +81,11 @@ class Smooth {
     int x_coordinate_offset;
     int local_x_min_calculate;
     int local_x_max_calculate;
-    std::vector<std::vector<density> > field1;
-    std::vector<std::vector<density> > field2;
-    std::vector<std::vector<density> > * field;
-    std::vector<std::vector<density> > * fieldNew;
+    typedef std::vector<std::vector<density> > t_field;
+    t_field field1;
+    t_field field2;
+    t_field *field;
+    t_field *fieldNew;
     density *send_transport_buffer;
     density *receive_transport_buffer;
 };
