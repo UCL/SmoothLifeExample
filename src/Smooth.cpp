@@ -352,18 +352,18 @@ void Smooth::CommunicateMPI(){
 
 void Smooth::DefineHaloDatatype(){
   std::vector<int> widths(range);
-  std::vector<MPI_Aint> offsets(range);
+  std::vector<int> offsets(range);
   for (unsigned int i=0;i<range;i++){
     widths[i]=sizey;
     offsets[i]=&((*field)[i][0])-&((*field)[0][0]);
   }
-  MPI_Type_create_hindexed(range,&(widths[0]),&(offsets[0]),MPI_DOUBLE,&halo_type);
+  MPI_Type_indexed(range,&(widths[0]),&(offsets[0]),MPI_DOUBLE,&halo_type);
   MPI_Type_commit(&halo_type);
 }
 
 void Smooth::CommunicateMPIDerivedDatatype(){
   MPI_Sendrecv(                       &((*field)[range][0]),1,halo_type,left,rank,
-                         &((*field)[local_x_size+range][0]),1,halo_type,right,right,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-  MPI_Sendrecv(                &((*field)[local_x_size][0]),1,halo_type,right,mpi_size+rank,
+                         &((*field)[local_x_max_calculate][0]),1,halo_type,right,right,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+  MPI_Sendrecv(                &((*field)[local_x_max_calculate-range][0]),1,halo_type,right,mpi_size+rank,
                                           &((*field)[0][0]),1,halo_type,left,mpi_size+left,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 }
