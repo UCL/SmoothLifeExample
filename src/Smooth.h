@@ -48,6 +48,7 @@ class Smooth {
     void SeedDisk(int at_x=0,int at_y=0);
     void SeedRing(int at_x=0,int at_y=0);
     void Update();
+    void QuickUpdateStripe(int from_x, int to_x);
     void QuickUpdate();
     void Write(std::ostream &out);
     int Frame() const;
@@ -59,6 +60,13 @@ class Smooth {
     void BufferRightHaloForSend();
     void UnpackRightHaloFromReceive();
     void UnpackLeftHaloFromReceive();
+    void InitiateLeftComms();
+    void InitiateRightComms();
+    void ResolveLeftComms();
+    void ResolveRightComms();
+    void UpdateAndCommunicateAsynchronously();
+    void CommunicateAsynchronously();
+    void SwapFields();
   private:
     int sizey;
     distance inner;
@@ -95,5 +103,7 @@ class Smooth {
     density *receive_transport_buffer;
     MPI_Datatype halo_type;
     void DefineHaloDatatype();
+    MPI_Request request_left;
+    MPI_Request request_right;
 };
 

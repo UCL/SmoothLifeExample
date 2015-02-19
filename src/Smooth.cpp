@@ -222,8 +222,13 @@ void Smooth::Update() {
 
 }
 
-void Smooth::QuickUpdate() {
-  for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
+void Smooth::QuickUpdate(){
+  QuickUpdateStripe(local_x_min_calculate,local_x_max_calculate);
+  SwapFields();
+}
+
+void Smooth::QuickUpdateStripe(int from_x,int to_x) {
+  for (int x=from_x;x<to_x;x++) {
     for (int y=0;y<sizey;y++) {
       double ring_total=0.0;
       double disk_total=0.0;
@@ -245,7 +250,9 @@ void Smooth::QuickUpdate() {
       SetNewField(x,y,transition(disk_total/normalisation_disk,ring_total/normalisation_ring));
     }
   }
+}
 
+void Smooth::SwapFields(){
   t_field * fieldTemp;
   fieldTemp=field;
   field=fieldNew;
@@ -366,8 +373,46 @@ void Smooth::DefineHaloDatatype(){
 }
 
 void Smooth::CommunicateMPIDerivedDatatype(){
-  MPI_Sendrecv(                       (*field)+sizey*local_x_min_calculate,1,halo_type,left,rank,
-               (*field)+sizey*local_x_max_calculate,1,halo_type,right,right,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-  MPI_Sendrecv((*field)+sizey*local_x_min_needed_right,1,halo_type,right,mpi_size+rank,
-                                      (*field),1,halo_type,left,mpi_size+left,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+  MPI_Sendrecv(                       *field+sizey*local_x_min_calculate,1,halo_type,left,rank,
+               *field+sizey*local_x_max_calculate,1,halo_type,right,right,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+  MPI_Sendrecv(*field+sizey*local_x_min_needed_right,1,halo_type,right,mpi_size+rank,
+                                      *field,1,halo_type,left,mpi_size+left,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+}
+
+void Smooth::InitiateLeftComms(){
+  MPI_Isend(*field+sizey*local_x_min_calculate,1,halo_type,left,rank,MPI_COMM_WORLD,&request_left);
+  MPI_Irecv(*field+sizey*local_x_max_calculate,1,halo_type,right,right,MPI_COMM_WORLD,&request_left);
+}
+
+void Smooth::InitiateRightComms(){
+  MPI_Isend(*field+sizey*local_x_min_needed_right,1,halo_type,left,rank,MPI_COMM_WORLD,&request_right);
+  MPI_Irecv(*field,1,halo_type,right,right,MPI_COMM_WORLD,&request_right);
+}
+
+void Smooth::ResolveLeftComms(){
+  MPI_Wait(&request_left,MPI_STATUS_IGNORE);
+}
+
+void Smooth::ResolveRightComms(){
+  MPI_Wait(&request_right,MPI_STATUS_IGNORE);
+}
+
+void Smooth::CommunicateAsynchronously(){
+  InitiateLeftComms();
+  ResolveLeftComms();
+  InitiateRightComms();
+  ResolveRightComms();
+}
+
+void Smooth::UpdateAndCommunicateAsynchronously(){
+
+  InitiateLeftComms();
+  // Calculate Middle Stripe
+  QuickUpdateStripe(local_x_max_needed_left,local_x_min_needed_right);
+  ResolveLeftComms(); // So we now have the right halo
+  InitiateRightComms();
+  QuickUpdateStripe(local_x_min_needed_right,local_x_max_calculate);
+  ResolveRightComms();
+  QuickUpdateStripe(local_x_min_calculate,local_x_max_needed_left);
+  SwapFields();
 }

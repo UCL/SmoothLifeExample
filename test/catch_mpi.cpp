@@ -89,5 +89,31 @@ TEST_CASE ("MPI Tests"){
        }
 
     }
+  
+    SECTION("Behaviour unchanged by asynchronous communication"){
+       Smooth smooth(100,100,5,0,1);
+       smooth.SeedRing();
+       smooth.SeedRing(50,50);
+    
+       Smooth paraSmooth(100,100,5,rank,size);
+       paraSmooth.SeedRing();
+       paraSmooth.SeedRing(50,50);
+       paraSmooth.CommunicateAsynchronously();
+       
+       for (unsigned int x=0;x<50;x++){
+         for (unsigned int y=0;y<100;y++){
+           REQUIRE(std::abs(smooth.Field(x+15+rank*50,y) - paraSmooth.Field(x+15,y))<0.00001);
+         }
+       }
+       smooth.QuickUpdate();
+       paraSmooth.UpdateAndCommunicateAsynchronously();
+      
+       for (unsigned int x=0;x<50;x++){
+         for (unsigned int y=0;y<100;y++){
+           REQUIRE(std::abs(smooth.Field(x+15+rank*50,y) - paraSmooth.Field(x+15,y))<0.00001);
+         }
+       }
+
+    }
 
 }
