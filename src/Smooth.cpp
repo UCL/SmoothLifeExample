@@ -62,6 +62,8 @@ Smooth::Smooth(int sizex,
     right=0;
   }
   DefineHaloDatatype();
+  assert(range<local_x_size); // OTHERWISE THE CALCULATED ZONE
+  // CAN'T FILL THE HALO; WOULD NEED NEXT-TO-NEAREST COMMS
 }
 
 Smooth::~Smooth(){
