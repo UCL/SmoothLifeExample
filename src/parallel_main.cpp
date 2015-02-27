@@ -4,7 +4,7 @@
 #include <cassert>
 #include <ctime>
 #include "Smooth.h"
-#include "SmoothWriter.h"
+#include "ParallelWriter.h"
 #include <mpi.h>
 
 
@@ -58,8 +58,9 @@ int main(int argc, char **argv){
     smooth.SeedRandomDisk();
   }
   std::clock_t seed=std::clock();
-  SmoothWriter writer(smooth, rank, size);
+  ParallelWriter writer(smooth, rank, size);
   writer.Header(frames);
+  
   std::cout << "Rank " << rank << "ready" << std::endl;
   
   std::vector<std::clock_t> frame_times(frames+1);
