@@ -3,7 +3,7 @@
 
 void BinaryWriter::Write() {
   outfile->write(reinterpret_cast<char*>(smooth.StartOfWritingBlock()),
-      smooth.LocalXSize()*smooth.Sizey()*sizeof(double));
+      local_element_count*sizeof(double));
 }
 
 BinaryWriter::~BinaryWriter(){
@@ -18,8 +18,6 @@ BinaryWriter::BinaryWriter(Smooth & smooth, int rank, int size)
 }
 
 void BinaryWriter::Header(int frames){
-  int sizey=smooth.Sizey();
-  int sizex=smooth.LocalXSize();
   outfile->write(reinterpret_cast<char*>(&sizex),sizeof(int));
   outfile->write(reinterpret_cast<char*>(&sizey),sizeof(int));
   outfile->write(reinterpret_cast<char*>(&rank),sizeof(int));

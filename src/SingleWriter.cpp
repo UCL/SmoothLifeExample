@@ -3,8 +3,6 @@
 
 void SingleWriter::Write() {
 
-  unsigned int total_element_count=smooth.Sizex()*smooth.Sizey();
-  unsigned int local_element_count=smooth.LocalXSize()*smooth.Sizey();
   double * receive_buffer;
 
   if (rank==0){
@@ -38,8 +36,6 @@ void SingleWriter::Header(int frames){
   if (rank!=0) {
     return;
   }
-  int sizey=smooth.Sizey();
-  int sizex=smooth.Sizex();
   xdr_int(&xdrfile,&sizex);
   xdr_int(&xdrfile,&sizey);
   xdr_int(&xdrfile,&size);

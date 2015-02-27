@@ -17,6 +17,10 @@ class SmoothWriter{
     int rank;
     int size;
     std::ostringstream fname;
+    int total_element_count;
+    int local_element_count;
+    int sizex;
+    int sizey;
 };
 
 #endif // ONCE_SMOOTH_WRITER
