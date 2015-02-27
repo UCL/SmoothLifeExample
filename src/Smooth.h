@@ -32,6 +32,7 @@ class Smooth {
     int Sizey();
     int Range();
     int Rank();
+    density * StartOfWritingBlock();
     density Field(int x, int y) const;
     void SetNewField(int x, int y, density value);
     void SeedField(int x, int y, density value);

@@ -6,7 +6,7 @@ class SmoothWriter{
     SmoothWriter(Smooth & smooth, int rank, int size);
     ~SmoothWriter();
     void Write();
-    void Header();
+    void Header(int frames);
   private:
     Smooth &smooth;
     std::ostream *outfile;

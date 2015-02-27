@@ -296,7 +296,6 @@ void Smooth::SeedRandomDisk() {
   SeedDisk(x,y);
 }
 
-
 int Smooth::Frame() const {
   return frame;
 }
@@ -412,4 +411,8 @@ void Smooth::UpdateAndCommunicateAsynchronously(){
   ResolveRightComms();
   QuickUpdateStripe(local_x_min_calculate,local_x_max_needed_left);
   SwapFields();
+}
+
+density * Smooth::StartOfWritingBlock(){
+   return &(*field)[local_x_min_calculate*sizey];
 }

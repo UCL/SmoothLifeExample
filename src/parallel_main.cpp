@@ -21,10 +21,6 @@ int main(int argc, char **argv){
   std::string config_path = argv[1];
   std::ifstream config_file(config_path.c_str());
   
-  std::ostringstream report_name;
-  report_name << "report" << rank << ".yml" << std::flush;
-  std::ofstream report(report_name.str().c_str());
-  
   int width;
   int height;
   int range;
@@ -43,7 +39,9 @@ int main(int argc, char **argv){
   config_file >> label >> spots ;
   assert(label=="spots:");
   
-  
+  std::ostringstream report_name;
+  report_name << "report" << rank << ".yml" << std::flush;
+  std::ofstream report(report_name.str().c_str());  
   
   report << "rank: " << rank << std::endl;
   report << "range: " << range << std::endl;
@@ -60,9 +58,8 @@ int main(int argc, char **argv){
     smooth.SeedRandomDisk();
   }
   std::clock_t seed=std::clock();
-  
   SmoothWriter writer(smooth, rank, size);
-  writer.Header();
+  writer.Header(frames);
   std::cout << "Rank " << rank << "ready" << std::endl;
   
   std::vector<std::clock_t> frame_times(frames+1);
