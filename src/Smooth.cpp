@@ -75,6 +75,10 @@ int Smooth::Range(){
   return range;
 }
 
+int Smooth::Rank(){
+  return rank;
+}
+
 int Smooth::LocalXSize(){
   return local_x_size;
 }
@@ -292,15 +296,6 @@ void Smooth::SeedRandomDisk() {
   SeedDisk(x,y);
 }
 
-void Smooth::Write(std::ostream &out) {
-   for (int x=local_x_min_calculate;x<local_x_max_calculate;x++) {
-     for (int y=0;y<sizey;y++) {
-        out << Field(x,y) << " , ";
-     }
-     out << std::endl;
-   }
-   out << std::endl;
-}
 
 int Smooth::Frame() const {
   return frame;

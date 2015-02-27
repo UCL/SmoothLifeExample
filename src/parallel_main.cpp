@@ -4,6 +4,7 @@
 #include <cassert>
 #include <ctime>
 #include "Smooth.h"
+#include "SmoothWriter.h"
 #include <mpi.h>
 
 
@@ -24,10 +25,6 @@ int main(int argc, char **argv){
   report_name << "report" << rank << ".yml" << std::flush;
   std::ofstream report(report_name.str().c_str());
   
-  std::ostringstream fname;
-  fname << "frames" << rank << ".dat" << std::flush;
-  std::ofstream outfile(fname.str().c_str());
-
   int width;
   int height;
   int range;
@@ -64,14 +61,15 @@ int main(int argc, char **argv){
   }
   std::clock_t seed=std::clock();
   
-  outfile << smooth.LocalXSize() << ", " << smooth.Sizey() << ", " << rank << ", " << size << std::endl;
+  SmoothWriter writer(smooth, rank, size);
+  writer.Header();
   std::cout << "Rank " << rank << "ready" << std::endl;
   
   std::vector<std::clock_t> frame_times(frames+1);
   
   for (unsigned int frame=0; frame<frames; frame++) {
     frame_times[frame]=std::clock();
-    smooth.Write(outfile);
+    writer.Write();
     smooth.UpdateAndCommunicateAsynchronously();
     std::cout << "Rank " << rank << " completed frame: " << smooth.Frame() << std::endl;
   }
