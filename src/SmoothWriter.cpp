@@ -14,7 +14,7 @@ void SmoothWriter::Write() {
   }
   
   MPI_Gather(smooth.StartOfWritingBlock(),local_element_count,MPI_DOUBLE,
-      receive_buffer,total_element_count,MPI_DOUBLE,0,MPI_COMM_WORLD); 
+      receive_buffer,local_element_count,MPI_DOUBLE,0,MPI_COMM_WORLD); 
 
   if (rank==0){
      xdr_vector(&xdrfile,reinterpret_cast<char*>(receive_buffer),
