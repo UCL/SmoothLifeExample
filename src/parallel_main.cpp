@@ -5,6 +5,10 @@
 #include <ctime>
 #include "Smooth.h"
 #include "ParallelWriter.h"
+#include "SingleWriter.h"
+#include "TextWriter.h"
+#include "BinaryWriter.h"
+#include "XdrWriter.h"
 #include <mpi.h>
 
 

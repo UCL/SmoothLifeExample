@@ -18,9 +18,8 @@ TextWriter::~TextWriter(){
 TextWriter::TextWriter(Smooth & smooth, int rank, int size)
     :SmoothWriter(smooth,rank,size)
 {
-     std::ostringstream fname;
-     fname << "frames" << rank << ".dat" << std::flush;
-     outfile=new std::ofstream(fname.str().c_str());
+  fname << "." << rank << std::flush;    
+  outfile=new std::ofstream(fname.str().c_str());
 }
 
 void TextWriter::Header(int frames){

@@ -1,3 +1,6 @@
+#ifndef ONCE_SMOOTH_WRITER
+#define ONCE_SMOOTH_WRITER
+
 #include <mpi.h>
 #include "Smooth.h"
 #include <sstream>
@@ -13,4 +16,7 @@ class SmoothWriter{
     Smooth &smooth;
     int rank;
     int size;
+    std::ostringstream fname;
 };
+
+#endif // ONCE_SMOOTH_WRITER

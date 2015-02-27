@@ -29,8 +29,6 @@ SingleWriter::SingleWriter(Smooth & smooth, int rank, int size)
      if (rank!=0) {
        return;
      }
-     std::ostringstream fname;
-     fname << "frames.dat" << std::flush;
      std::string mode("w");
      std::FILE * myFile = std::fopen(fname.str().c_str(),mode.c_str());
      xdrstdio_create(&xdrfile, myFile, XDR_ENCODE);

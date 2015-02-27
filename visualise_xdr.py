@@ -6,14 +6,14 @@ from StringIO import StringIO
 
 folder=sys.argv[1]
 
-with open(os.path.join(folder,'frames0.dat')) as data:
+with open(os.path.join(folder,'frames.dat.0')) as data:
     header=numpy.fromfile(data,'>i4',5)
     rows,columns,rank,size,frame_count=header
     print header
 
 process_frames=[]
 for process in range(size):
-    with open(os.path.join(folder,'frames'+str(process)+'.dat')) as data:
+    with open(os.path.join(folder,'frames.dat.'+str(process))) as data:
         header=numpy.fromfile(data,'>i4',5)
         width, height, rank, size, frame_count = header
         buffer=numpy.fromfile(data,'>f8',frame_count*width*height)

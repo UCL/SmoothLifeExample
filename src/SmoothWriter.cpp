@@ -3,5 +3,7 @@
 #include "SmoothWriter.h"
 
 SmoothWriter::SmoothWriter(Smooth & smooth, int rank, int size)
-    :smooth(smooth),rank(rank),size(size){};
+    :smooth(smooth),rank(rank),size(size){
+     fname << "frames.dat" << std::flush;
+};
 

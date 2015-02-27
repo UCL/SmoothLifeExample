@@ -6,13 +6,13 @@ from StringIO import StringIO
 
 folder=sys.argv[1]
 
-with open(os.path.join(folder,'frames0.dat')) as data:
+with open(os.path.join(folder,'frames.dat.0')) as data:
     header=numpy.genfromtxt(StringIO(data.readline()),delimiter=",",dtype=int)
     rows=header[0]
     
 process_frames=[]
 for process in range(header[3]):
-    data=numpy.genfromtxt(os.path.join(folder,'frames'+str(process)+'.dat'),delimiter=",",skip_header=1)[:,:-1]
+    data=numpy.genfromtxt(os.path.join(folder,'frames.dat.'+str(process)),delimiter=",",skip_header=1)[:,:-1]
     lines, columns=data.shape
     process_frames.append(data.reshape((lines/rows,rows,columns)))
 frames=numpy.concatenate(process_frames, 1)

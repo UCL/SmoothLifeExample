@@ -12,8 +12,7 @@ XDRWriter::~XDRWriter(){
 XDRWriter::XDRWriter(Smooth & smooth, int rank, int size)
     :SmoothWriter(smooth,rank,size)
 {
-     std::ostringstream fname;
-     fname << "frames" << rank << ".dat" << std::flush;
+     fname << "." << rank << std::flush;    
      std::string mode("w");
      std::FILE * myFile = std::fopen(fname.str().c_str(),mode.c_str());
      xdrstdio_create(&xdrfile, myFile, XDR_ENCODE);
