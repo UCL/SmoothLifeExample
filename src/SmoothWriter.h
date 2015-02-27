@@ -1,5 +1,8 @@
 #include <mpi.h>
 #include "Smooth.h"
+#include <cstdio>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 
 class SmoothWriter{
   public:
@@ -9,7 +12,7 @@ class SmoothWriter{
     void Header(int frames);
   private:
     Smooth &smooth;
-    std::ostream *outfile;
+    XDR xdrfile;
     int rank;
     int size;
 };

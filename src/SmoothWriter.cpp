@@ -3,12 +3,13 @@
 #include "SmoothWriter.h"
 
 void SmoothWriter::Write() {
-  outfile->write(reinterpret_cast<char*>(smooth.StartOfWritingBlock()),
-      smooth.LocalXSize()*smooth.Sizey()*sizeof(double));
+
+  char * start_to_write=reinterpret_cast<char*>(smooth.StartOfWritingBlock());
+  unsigned int element_count=smooth.LocalXSize()*smooth.Sizey();
+  xdr_vector(&xdrfile,start_to_write,element_count,sizeof(double),reinterpret_cast<xdrproc_t>(xdr_double));
 }
 
 SmoothWriter::~SmoothWriter(){
-  delete outfile; // closes it
 }
 
 SmoothWriter::SmoothWriter(Smooth & smooth, int rank, int size)
@@ -16,15 +17,19 @@ SmoothWriter::SmoothWriter(Smooth & smooth, int rank, int size)
 {
      std::ostringstream fname;
      fname << "frames" << rank << ".dat" << std::flush;
-     outfile=new std::ofstream(fname.str().c_str(),std::ios::binary);
+     std::string mode("w");
+     std::FILE * myFile = std::fopen(fname.str().c_str(),mode.c_str());
+     xdrstdio_create(&xdrfile, myFile, XDR_ENCODE);
 }
 
 void SmoothWriter::Header(int frames){
   int sizey=smooth.Sizey();
   int sizex=smooth.LocalXSize();
-  outfile->write(reinterpret_cast<char*>(&sizex),sizeof(int));
-  outfile->write(reinterpret_cast<char*>(&sizey),sizeof(int));
-  outfile->write(reinterpret_cast<char*>(&rank),sizeof(int));
-  outfile->write(reinterpret_cast<char*>(&size),sizeof(int));
-  outfile->write(reinterpret_cast<char*>(&frames),sizeof(int));
+  xdr_int(&xdrfile,&sizex);
+  xdr_int(&xdrfile,&sizey);
+  xdr_int(&xdrfile,&rank);
+  xdr_int(&xdrfile,&size);
+  xdr_int(&xdrfile,&frames);
+
 }
+

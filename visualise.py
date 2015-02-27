@@ -7,16 +7,16 @@ from StringIO import StringIO
 folder=sys.argv[1]
 
 with open(os.path.join(folder,'frames0.dat')) as data:
-    header=numpy.fromfile(data,'i4',5)
+    header=numpy.fromfile(data,'>i4',5)
     rows,columns,rank,size,frame_count=header
     print header
 
 process_frames=[]
 for process in range(size):
     with open(os.path.join(folder,'frames'+str(process)+'.dat')) as data:
-        header=numpy.fromfile(data,'i4',5)
+        header=numpy.fromfile(data,'>i4',5)
         width, height, rank, size, frame_count = header
-        buffer=numpy.fromfile(data,'<f8',frame_count*width*height)
+        buffer=numpy.fromfile(data,'>f8',frame_count*width*height)
         print buffer.shape
         print frame_count,width,height
         print buffer[0]
