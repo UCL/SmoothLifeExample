@@ -81,6 +81,6 @@ int main(int argc, char **argv){
   for (unsigned int frame=0; frame<frames; frame++) {
     report_time(report, "    -", frame_times[frame+1], frame_times[frame]);
   }
-
+  writer.Close();
   MPI_Finalize();
 }

@@ -7,19 +7,17 @@ void SmoothWriter::Write() {
 
   unsigned int total_element_count=smooth.Sizex()*smooth.Sizey();
   unsigned int local_element_count=smooth.LocalXSize()*smooth.Sizey();
-  double * receive_buffer;
+ 
+  int offset=4*sizeof(int) + // The header
+             rank*local_element_count*sizeof(double) + // Offset within the frame
+             smooth.Frame()*total_element_count*sizeof(double); // Frame offset in the file
 
-  if (rank==0){
-     receive_buffer=new double[total_element_count];
-  }
-  
-  MPI_Gather(smooth.StartOfWritingBlock(),local_element_count,MPI_DOUBLE,
-      receive_buffer,local_element_count,MPI_DOUBLE,0,MPI_COMM_WORLD); 
+  MPI_File_seek(outfile,offset,MPI_SEEK_SET);
+  MPI_File_write(outfile,smooth.StartOfWritingBlock(),local_element_count,MPI_DOUBLE,MPI_STATUS_IGNORE);
+}
 
-  if (rank==0){
-     xdr_vector(&xdrfile,reinterpret_cast<char*>(receive_buffer),
-         total_element_count,sizeof(double),reinterpret_cast<xdrproc_t>(xdr_double));
-  }
+void SmoothWriter::Close(){
+  MPI_File_close(&outfile);
 }
 
 SmoothWriter::~SmoothWriter(){
@@ -28,14 +26,10 @@ SmoothWriter::~SmoothWriter(){
 SmoothWriter::SmoothWriter(Smooth & smooth, int rank, int size)
     :smooth(smooth),rank(rank),size(size)
 {
-     if (rank!=0) {
-       return;
-     }
      std::ostringstream fname;
      fname << "frames.dat" << std::flush;
-     std::string mode("w");
-     std::FILE * myFile = std::fopen(fname.str().c_str(),mode.c_str());
-     xdrstdio_create(&xdrfile, myFile, XDR_ENCODE);
+     MPI_File_open(MPI_COMM_WORLD, fname.str().c_str(), 
+                MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &outfile);
 }
 
 void SmoothWriter::Header(int frames){
@@ -44,10 +38,9 @@ void SmoothWriter::Header(int frames){
   }
   int sizey=smooth.Sizey();
   int sizex=smooth.Sizex();
-  xdr_int(&xdrfile,&sizex);
-  xdr_int(&xdrfile,&sizey);
-  xdr_int(&xdrfile,&size);
-  xdr_int(&xdrfile,&frames);
-
+  MPI_File_write(outfile,&sizex,1,MPI_INT,MPI_STATUS_IGNORE);
+  MPI_File_write(outfile,&sizey,1,MPI_INT,MPI_STATUS_IGNORE);
+  MPI_File_write(outfile,&size,1,MPI_INT,MPI_STATUS_IGNORE);
+  MPI_File_write(outfile,&frames,1,MPI_INT,MPI_STATUS_IGNORE);
 }
 
