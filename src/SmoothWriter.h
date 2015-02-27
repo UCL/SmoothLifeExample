@@ -4,12 +4,12 @@
 class SmoothWriter{
   public:
     SmoothWriter(Smooth & smooth, int rank, int size);
-    ~SmoothWriter();
-    void Write();
-    void Header(int frames);
-  private:
+    virtual ~SmoothWriter(){};
+    virtual void Write()=0;
+    virtual void Header(int frames)=0;
+    virtual void Close(){};
+  protected:
     Smooth &smooth;
-    std::ostream *outfile;
     int rank;
     int size;
 };
