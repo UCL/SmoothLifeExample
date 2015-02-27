@@ -17,7 +17,6 @@ void SmoothWriter::Write() {
 }
 
 void SmoothWriter::Close(){
-  MPI_File_close(&outfile);
 }
 
 SmoothWriter::~SmoothWriter(){
@@ -28,8 +27,7 @@ SmoothWriter::SmoothWriter(Smooth & smooth, int rank, int size)
 {
      std::ostringstream fname;
      fname << "frames.dat" << std::flush;
-     MPI_File_open(MPI_COMM_WORLD, fname.str().c_str(), 
-                MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &outfile);
+     outfile.openFile( fname.str(), H5F_ACC_TRUNC );
 }
 
 void SmoothWriter::Header(int frames){

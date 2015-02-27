@@ -1,6 +1,7 @@
 #include <mpi.h>
 #include "Smooth.h"
 #include <cstdio>
+#include <H5Cpp.h>
 
 class SmoothWriter{
   public:
@@ -11,7 +12,7 @@ class SmoothWriter{
     void Header(int frames);
   private:
     Smooth &smooth;
-    MPI_File outfile;
+    H5::H5File outfile;
     int rank;
     int size;
 };
