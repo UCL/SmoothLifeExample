@@ -7,10 +7,10 @@ from StringIO import StringIO
 folder=sys.argv[1]
 
 with open(os.path.join(folder,'frames.dat')) as data:
-    header=numpy.fromfile(data,'>i4',4)
+    header=numpy.fromfile(data,'i4',4)
     width,height,size,frame_count=header
     print header
-    buffer=numpy.fromfile(data,'>f8',frame_count*width*height)
+    buffer=numpy.fromfile(data,'<f8',frame_count*width*height)
     print frame_count,width,height
     frames=buffer.reshape(frame_count,width,height)
 
