@@ -1,18 +1,16 @@
 #include <mpi.h>
 #include "Smooth.h"
-#include <cstdio>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <sstream>
 
 class SmoothWriter{
   public:
     SmoothWriter(Smooth & smooth, int rank, int size);
-    ~SmoothWriter();
-    void Write();
-    void Header(int frames);
-  private:
+    virtual ~SmoothWriter(){};
+    virtual void Write()=0;
+    virtual void Header(int frames)=0;
+    virtual void Close(){};
+  protected:
     Smooth &smooth;
-    XDR xdrfile;
     int rank;
     int size;
 };
