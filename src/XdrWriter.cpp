@@ -20,7 +20,6 @@ XDRWriter::XDRWriter(Smooth & smooth, int rank, int size)
 void XDRWriter::Header(int frames){
   xdr_int(&xdrfile,&sizex);
   xdr_int(&xdrfile,&sizey);
-  xdr_int(&xdrfile,&rank);
   xdr_int(&xdrfile,&size);
   xdr_int(&xdrfile,&frames);
 

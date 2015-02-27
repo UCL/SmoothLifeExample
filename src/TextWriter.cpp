@@ -23,5 +23,5 @@ TextWriter::TextWriter(Smooth & smooth, int rank, int size)
 }
 
 void TextWriter::Header(int frames){
-  *outfile << smooth.LocalXSize() << ", " << smooth.Sizey() << ", " << rank << ", " << size << std::endl;
+  *outfile << sizex << ", " << sizey << ", " << size << ", " << frames << std::endl;
 }

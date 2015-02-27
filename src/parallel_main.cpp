@@ -62,7 +62,7 @@ int main(int argc, char **argv){
     smooth.SeedRandomDisk();
   }
   std::clock_t seed=std::clock();
-  ParallelWriter writer(smooth, rank, size);
+  TextWriter writer(smooth, rank, size);
   writer.Header(frames);
   
   std::cout << "Rank " << rank << "ready" << std::endl;

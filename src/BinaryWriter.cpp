@@ -20,7 +20,6 @@ BinaryWriter::BinaryWriter(Smooth & smooth, int rank, int size)
 void BinaryWriter::Header(int frames){
   outfile->write(reinterpret_cast<char*>(&sizex),sizeof(int));
   outfile->write(reinterpret_cast<char*>(&sizey),sizeof(int));
-  outfile->write(reinterpret_cast<char*>(&rank),sizeof(int));
   outfile->write(reinterpret_cast<char*>(&size),sizeof(int));
   outfile->write(reinterpret_cast<char*>(&frames),sizeof(int));
 }
