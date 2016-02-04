@@ -53,10 +53,10 @@ TEST_CASE( "Smooth mathematical functions are correct","[Smooth]") {
     REQUIRE(std::abs(Smooth::Sigmoid(0.0,1.0,0.1)) < 0.001);
   }
   SECTION ("Transition function is correct") {
-    REQUIRE(abs(smooth.transition(1.0,0.3) - 1.0) <0.1);
+    REQUIRE(std::abs(smooth.transition(1.0,0.3) - 1.0) <0.1);
     REQUIRE(smooth.transition(1.0,1.0)==0.0);
-    REQUIRE(abs(smooth.transition(0.0,0.3)-1.0) < 0.1);
-    REQUIRE(abs(smooth.transition(0.0,0.0)) < 0.1);
+    REQUIRE(std::abs(smooth.transition(0.0,0.3)-1.0) < 0.1);
+    REQUIRE(std::abs(smooth.transition(0.0,0.0)) < 0.1);
 
   }
   SECTION ("Wraparound Distance is correct") {
@@ -70,7 +70,7 @@ TEST_CASE( "Smooth mathematical functions are correct","[Smooth]") {
 TEST_CASE ("NormalisationsAreCorrect") {
   Smooth smooth(100,100,10);
   SECTION ("Disk Normalisation is correct") {
-    // Should be roughly pi*radius*radius, 
+    // Should be roughly pi*radius*radius,
     REQUIRE(std::abs(smooth.NormalisationDisk()-314.15)<1.0);
   }
   SECTION ("Ring Normalisation is correct") {
@@ -83,16 +83,16 @@ TEST_CASE ("FillingsAreUnityWhenSeeded") {
   Smooth smooth;
   SECTION ("DiskFillingUnityWithDiskSeed") {
     smooth.SeedDisk();
-    REQUIRE(abs(smooth.FillingDisk(0,0)-1.0)<0.1);
+    REQUIRE(std::abs(smooth.FillingDisk(0,0)-1.0)<0.1);
   }
 
   SECTION ("Disk Filling Zero With Ring Seed") {
     smooth.SeedRing();
-    REQUIRE(abs(smooth.FillingDisk(0,0))<0.1);
+    REQUIRE(std::abs(smooth.FillingDisk(0,0))<0.1);
   }
   SECTION ("RingFillingUnityWithRingSeed") {
     smooth.SeedRing();
-    REQUIRE(abs(smooth.FillingRing(0,0)-1.0)<0.1);
+    REQUIRE(std::abs(smooth.FillingRing(0,0)-1.0)<0.1);
   }
 }
 
