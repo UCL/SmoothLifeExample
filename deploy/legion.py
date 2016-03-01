@@ -17,7 +17,7 @@ modules = nested(
 )
 
 @task
-def cold(branch='mpi'):
+def cold(branch='parallel'):
     run('rm -rf '+env.deploy_to)
     run('mkdir -p '+env.deploy_to)
     run('mkdir -p '+env.run_at)
@@ -32,7 +32,7 @@ def cold(branch='mpi'):
                 run('test/catch')
 
 @task
-def warm(branch='mpi'):
+def warm(branch='parallel'):
   with cd(env.deploy_to+'/SmoothLifeExample/build'):
         with modules:
             run('git checkout '+branch)
